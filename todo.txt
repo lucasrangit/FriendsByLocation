@@ -1,0 +1,31 @@
+
+Insert submit button to form.
+
+Logout from any page or on error.
+
+location > hometown (don't use)
+  ("Lives in" > "last known location" if when) 
+ 
+Hide users with unknown location
+
+Requests taking too long
+
+LATER
+
+Where and When?
+
+Persona: have a layover for 2 days, who to meet
+ Right Now
+ 
+ Planner
+
+User Preferrences
+  Prompt to change Preferred Location when logging in (default to Facebook's data)
+  Save if user overrided
+  
+2nd Degrees
+  Sorting: priorities Dazy users at the top
+  
+See More Results?
+  Show by hometown
+

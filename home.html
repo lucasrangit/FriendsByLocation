@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title>Your Facebook Friends Are...</title>
+    <style type="text/css">
+      body {
+       font-family: arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="header">
+    </div>
+    <div id="content">
+      {% if user %}
+        <p><a href="{{ user.profile_url }}"><img src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
+        </p>
+        <p>Hello, {{ user.name|escape }}</p>
+        <p>Your friends are (limit 10)...</p>
+        <ul>
+        {% for friend in friends %}
+          <li><a href="{{ friend.link }}"><img src="http://graph.facebook.com/{{ friend.id }}/picture?type=square"/></a>{{ friend.name }} lives in {{ friend.location }}</li>
+        {% endfor %}
+        </ul>
+      {% else %}
+        <p>
+          Sign in to customize.
+        </p>
+      {% endif %}
+        <p>
+          The time is: {{ current_time }}
+        <p>
+      {% if user %}
+        <form action="/prefs" method="post">
+          <label for="tz_offset">
+            Timezone offset from UTC (can be negative):
+          </label>
+          <input name="tz_offset" id="tz_offset" type="text" size="4" value"{{ userprefs.tz_offset }}" />
+        </form>
+      {% endif %}
+    </div>
+    <fb:login-button autologoutlink="true" scope="publish_stream,user_location,friends_location"></fb:login-button>
+    <div id="fb-root"></div>
+    <script>
+      window.fbAsyncInit = function() {
+        FB.init({appId: '{{ facebook_app_id }}', status: true, cookie: true,
+                 xfbml: true});
+        FB.Event.subscribe('{% if user %}auth.logout{% else %}auth.login{% endif %}', function(response) {
+          {% if user %} window.location = "/logout" {% else %} window.location.reload(); {% endif %}
+        });
+      };
+      (function() {
+        var e = document.createElement('script');
+        e.type = 'text/javascript';
+        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+        e.async = true;
+        document.getElementById('fb-root').appendChild(e);
+      }());
+    </script>
+  </body>
+</html>
