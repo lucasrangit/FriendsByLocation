@@ -192,11 +192,11 @@ class MainPage(BaseHandler):
 
 
 class LogoutHandler(BaseHandler):
-    def get(self):
-        if self.current_user is not None:
-            self.session['user'] = None
+  def get(self):
+    if self.current_user is not None:
+        self.session['user'] = None
 
-        self.redirect('/')
+    self.redirect('/')
 
 
 class PrefsPage(BaseHandler):
