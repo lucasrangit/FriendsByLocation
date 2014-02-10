@@ -14,13 +14,13 @@
     </div>
     <div id="content">
       {% if user %}
-        <p><a href="{{ user.profile_url }}"><img src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
+        <p><a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
         </p>
         <p>Hello, {{ user.name|escape }}</p>
         <p>Your friends are (limit 10)...</p>
         <ul>
         {% for friend in friends %}
-          <li><a href="{{ friend.link }}"><img src="http://graph.facebook.com/{{ friend.id }}/picture?type=square"/></a>{{ friend.name }} lives in {{ friend.location }}</li>
+          <li><a href="{{ friend.link }}"><img width="50" height="50" src="http://graph.facebook.com/{{ friend.id }}/picture?type=square"/></a>{{ friend.name }} lives in {{ friend.location }}</li>
         {% endfor %}
         </ul>
       {% else %}
