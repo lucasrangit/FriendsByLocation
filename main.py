@@ -202,7 +202,9 @@ class LogoutHandler(BaseHandler):
 class PrefsPage(BaseHandler):
   def post(self):
     user = self.current_user
+    logging.info("Updating preferences for user %s" % user["id"])
     userprefs = models.get_userprefs(user["id"])
+    userprefs.location = self.request.get('location')
     try:
       tz_offset = int(self.request.get('tz_offset'))
       userprefs.tz_offset = tz_offset

@@ -54,6 +54,14 @@
         <p>
       {% if user %}
         <form action="/prefs" method="post">
+          <label for="location">
+            Lookup location:
+          </label>
+          <select name="location">
+            <option value="Los Angeles, CA">Los Angeles, CA</option>
+            <option value="San Francisco, CA">San Francisco, CA</option>
+            <option value="New York, NY">New York, NY</option>
+          </select>
           <label for="tz_offset">
             Timezone offset from UTC (can be negative):
           </label>
