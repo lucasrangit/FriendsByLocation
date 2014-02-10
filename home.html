@@ -5,28 +5,49 @@
     <title>Your Facebook Friends Are...</title>
     <style type="text/css">
       body {
-       font-family: arial, sans-serif;
+        font-family: sans-serif;
+      }
+      #header {
+        background-color: #dde;
+        border-top: 3px solid #36c;
+        height: 100%;
+        overflow:hidden;
+      }
+      #header h1 {
+        font-size: 14px;
+        text-decoration: none;
+        color: black;
+        float: left;
+        vertical-align: middle;
+      }
+      #header li {
+        font-size: 14px;
+        display: inline;
+      }
+      #header a img {
+        float: left;
+        vertical-align: middle;
       }
     </style>
   </head>
   <body>
     <div id="header">
+      {% if user %}
+        <a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
+        <h1>Hello, {{ user.name|escape }}</h1>
+      {% else %}
+        <h1>Hello, sign it to continue.</h1>
+      {% endif %}
+        <p style="float: right; vertical-align: middle; margin: 0; padding: 0; margin-top: 5px;"><fb:login-button autologoutlink="true" scope="publish_stream,user_location,friends_location"></fb:login-button></p>
     </div>
     <div id="content">
       {% if user %}
-        <p><a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
-        </p>
-        <p>Hello, {{ user.name|escape }}</p>
         <p>Your friends are (limit 10)...</p>
         <ul>
         {% for friend in friends %}
           <li><a href="{{ friend.link }}"><img width="50" height="50" src="http://graph.facebook.com/{{ friend.id }}/picture?type=square"/></a>{{ friend.name }} lives in {{ friend.location }}</li>
         {% endfor %}
         </ul>
-      {% else %}
-        <p>
-          Sign in to customize.
-        </p>
       {% endif %}
         <p>
           The time is: {{ current_time }}
@@ -40,7 +61,6 @@
         </form>
       {% endif %}
     </div>
-    <fb:login-button autologoutlink="true" scope="publish_stream,user_location,friends_location"></fb:login-button>
     <div id="fb-root"></div>
     <script>
       window.fbAsyncInit = function() {
