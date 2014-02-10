@@ -1,6 +1,3 @@
-FACEBOOK_APP_ID = "273973039422346"
-FACEBOOK_APP_SECRET = "6d1d83de18c0722cd94a902180b331cb"
-
 import datetime
 import facebook
 import jinja2
@@ -8,6 +5,9 @@ import models
 import os
 import webapp2
 import urllib2
+import secrets
+FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID
+FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET
 
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
