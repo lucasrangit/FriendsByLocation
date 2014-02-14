@@ -215,8 +215,12 @@ class PrefsPage(BaseHandler):
       
     self.redirect('/')
 
+def main():
+	application = webapp2.WSGIApplication(
+	  [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage)],
+	  config=config,
+	  debug=True)
 
-application = webapp2.WSGIApplication(
-  [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage)],
-  config=config,
-  debug=True)
+if __name__ == '__main__':
+	main()
+
