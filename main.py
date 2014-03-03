@@ -126,43 +126,29 @@ class MainPage(BaseHandler):
   def get(self):
     current_time = datetime.datetime.now()
     user = self.current_user
-    friends_list = []
-    friends_limit = 10
+    locations = dict()
     if user:
       graph = facebook.GraphAPI(user["access_token"])
-      friends = graph.get_connections("me", "friends")
-      # SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))
-      #friends_ids = [int(friend['id']) for friend in friends['data']]
-      #logging.info(friends_ids)
-      #profiles = graph.get_objects(friends_ids)
-      #logging.info(profiles)
-      for friend in friends['data']:
-        if 0 == friends_limit:
-          logging.info("Friend limit reached")
-          break
-          
-        #logging.info(new_friend)
-        #friends_list.append(friend['name'])
-        # TODO change to get_objects()
-        profile = graph.get_object(friend['id'])
+      # friends_of_friends = graph.fql("SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))")	
+      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
+      #logging.info(friends)
+      
+      for profile in friends['data']:
         logging.info(profile)
-        if 'location' not in profile:
+
+        if not profile['current_location']:
           continue
         else:
-          location_name = profile['location']['name']
-          friends_limit -= 1
-          
-        #friends_2nd = graph.get_connections(friend['id'], "friends")
-        #profile_2nd = graph.get_object(friends_2nd['id'])
-        #logging.info(profile_2nd)
-        
-        friends_list.append(Friend(
-            id=str(profile['id']),
-            name=profile['name'],
-            link=profile['link'],
-            location=location_name,
-        ))
-        
+          location_id = profile['current_location']['id']
+          location_name = profile['current_location']['name']
+          if location_id not in locations:
+            locations[location_id] = dict()
+            locations[location_id]['name'] = location_name
+            locations[location_id]['count'] = 1
+          else:
+            locations[location_id]['count'] += 1
+      logging.info(locations)
+      
     if user:
       userprefs = models.get_userprefs(user["id"])
     else:
@@ -177,7 +163,7 @@ class MainPage(BaseHandler):
       'current_time': current_time,
       'user': user,
       'userprefs': userprefs,
-      'friends': friends_list,
+      'locations': locations,
     }
     self.response.out.write(template.render(context))
     

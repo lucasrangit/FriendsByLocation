@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Your Facebook Friends Are...</title>
+    <title>Facebook Friends by Location...</title>
     <link href="/static/glike.css" rel="stylesheet" type="text/css" />
   </head>
   <body>
@@ -17,10 +17,14 @@
     </div>
     <div id="content">
       {% if user %}
-        <p>Your friends are (limit 10)...</p>
+        <p>Your friends by location are...</p>
         <ul>
-        {% for friend in friends %}
-          <li><a href="{{ friend.link }}"><img width="50" height="50" src="http://graph.facebook.com/{{ friend.id }}/picture?type=square"/></a>{{ friend.name }} lives in {{ friend.location }}</li>
+        {% for key,value in locations.items() %}
+          {% if value.count == 1 %}
+            <li>{{ value.count }} lives in {{ value.name }}</li>
+          {% else %}
+            <li>{{ value.count }} live in {{ value.name }}</li>
+          {% endif %}
         {% endfor %}
         </ul>
       {% endif %}
