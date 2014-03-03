@@ -19,7 +19,7 @@ config = {}
 config['webapp2_extras.sessions'] = dict(secret_key='')
 
 template_env = jinja2.Environment(
-  loader=jinja2.FileSystemLoader(os.getcwd()))
+  loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'templates')))
 
 
 class User(db.Model):
@@ -215,12 +215,8 @@ class PrefsPage(BaseHandler):
       
     self.redirect('/')
 
-def main():
-	application = webapp2.WSGIApplication(
-	  [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage)],
-	  config=config,
-	  debug=True)
-
-if __name__ == '__main__':
-	main()
+application = webapp2.WSGIApplication(
+  [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage)],
+  config=config,
+  debug=True)
 
