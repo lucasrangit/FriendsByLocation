@@ -28,18 +28,18 @@
         {% endfor %}
         </ul>
       {% endif %}
-        <p>
-          The time is: {{ current_time }}
-        <p>
+      <p>
+        The time is: {{ current_time }}
+      <p>
       {% if user %}
         <form action="/prefs" method="post">
           <label for="location">
-            Lookup location:
+            Filter by location:
           </label>
           <select name="location">
-            <option value="Los Angeles, CA">Los Angeles, CA</option>
-            <option value="San Francisco, CA">San Francisco, CA</option>
-            <option value="New York, NY">New York, NY</option>
+            {% for key,value in locations.items() %}
+              <option value="{{ key }}">{{ value.name }}</option>
+            {% endfor %}
           </select>
           <label for="tz_offset">
             Timezone offset from UTC (can be negative):
