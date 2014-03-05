@@ -130,6 +130,7 @@ class MainPage(BaseHandler):
     current_time = datetime.datetime.now()
     user = self.current_user
     locations = dict()
+    friends_count = 0
     if user:
       graph = facebook.GraphAPI(user["access_token"])
       # friends_of_friends = graph.fql("SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))")	
@@ -138,7 +139,7 @@ class MainPage(BaseHandler):
       
       for profile in friends['data']:
         logging.info(profile)
-
+        friends_count += 1
         if not profile['current_location']:
           continue
         else:
@@ -167,6 +168,7 @@ class MainPage(BaseHandler):
       'user': user,
       'userprefs': userprefs,
       'locations': locations,
+      'friends_count': friends_count,
     }
     self.response.out.write(template.render(context))
     

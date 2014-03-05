@@ -17,7 +17,7 @@
     </div>
     <div id="content">
       {% if user %}
-        <p>Your friends by location are...</p>
+        <p>Your {{ friends_count }} friends are located in...</p>
         <ul>
         {% for key,value in locations.items() %}
           {% if value.count == 1 %}
