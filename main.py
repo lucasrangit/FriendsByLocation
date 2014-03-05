@@ -5,6 +5,9 @@ import models
 import os
 import webapp2
 import urllib2
+
+# Store your Facebook app ID, API key, etc... in a file named secrets.py, which
+# is in .gitignore to protect the innocent.
 import secrets
 FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID
 FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET
