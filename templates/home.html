@@ -50,7 +50,8 @@
       {% endif %}
     </div>
     <div id="fb-root"></div>
-    <script>
+    <script type="text/javascript">
+      /* <![CDATA[ */
       window.fbAsyncInit = function() {
         FB.init({appId: '{{ facebook_app_id }}', status: true, cookie: true,
                  xfbml: true});
@@ -65,6 +66,7 @@
         e.async = true;
         document.getElementById('fb-root').appendChild(e);
       }());
+      /* ]]> */
     </script>
   </body>
 </html>
