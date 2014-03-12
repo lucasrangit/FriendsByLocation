@@ -1,8 +1,8 @@
 from google.appengine.ext import db
 
 class UserPrefs(db.Model):
-  tz_offset = db.IntegerProperty(default=0)
-  location = db.StringProperty(default="")
+  #location = db.StringProperty(default="")
+  location_id = db.IntegerProperty(default=0,required=False)
 
 def get_userprefs(user_id):
   key = db.Key.from_path('UserPrefs', user_id)

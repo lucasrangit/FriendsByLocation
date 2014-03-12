@@ -127,7 +127,6 @@ class BaseHandler(webapp2.RequestHandler):
 class MainPage(BaseHandler):
         
   def get(self):
-    current_time = datetime.datetime.now()
     user = self.current_user
     locations = dict()
     friends_count = 0
@@ -138,7 +137,7 @@ class MainPage(BaseHandler):
       #logging.info(friends)
       
       for profile in friends['data']:
-        logging.info(profile)
+        #logging.info(profile)
         friends_count += 1
         if not profile['current_location']:
           continue
@@ -151,7 +150,7 @@ class MainPage(BaseHandler):
             locations[location_id]['count'] = 1
           else:
             locations[location_id]['count'] += 1
-      logging.info(locations)
+      #logging.info(locations)
       
     if user:
       userprefs = models.get_userprefs(user["id"])
@@ -159,16 +158,16 @@ class MainPage(BaseHandler):
       userprefs = None
     
     if userprefs:
-      current_time += datetime.timedelta(0,0,0,0,0,userprefs.tz_offset)
+      current_location = userprefs.location_id
       
     template = template_env.get_template('home.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,      
-      'current_time': current_time,
       'user': user,
       'userprefs': userprefs,
       'locations': locations,
       'friends_count': friends_count,
+      'current_location': current_location,
     }
     self.response.out.write(template.render(context))
     
@@ -195,10 +194,9 @@ class PrefsPage(BaseHandler):
     user = self.current_user
     logging.info("Updating preferences for user %s" % user["id"])
     userprefs = models.get_userprefs(user["id"])
-    userprefs.location = self.request.get('location')
     try:
-      tz_offset = int(self.request.get('tz_offset'))
-      userprefs.tz_offset = tz_offset
+      userprefs.location_id = int(self.request.get('location'))
+      logging.info(userprefs.location_id)
       userprefs.put()
     except ValueError:
       # user entered value that was not integer
