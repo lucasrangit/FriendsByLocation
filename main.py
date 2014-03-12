@@ -167,7 +167,6 @@ class MainPage(BaseHandler):
       'userprefs': userprefs,
       'locations': locations,
       'friends_count': friends_count,
-      'current_location': current_location,
     }
     self.response.out.write(template.render(context))
     
