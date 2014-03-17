@@ -179,6 +179,38 @@ class MainPage(BaseHandler):
                  "photo.php?fbid={0}".format(response['id']))
     self.redirect(str(photo_url))
 
+class FriendsPage(BaseHandler)
+
+	def get(self):
+    user = self.current_user
+    friends_list = list()
+    if user:
+      graph = facebook.GraphAPI(user["access_token"])
+      # friends_of_friends = graph.fql("SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))")	
+      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
+      #logging.info(friends)
+      
+      for profile in friends['data']:
+        #logging.info(profile)
+				friends_list.append(profile)
+      #logging.info(locations)
+      
+    if user:
+      userprefs = models.get_userprefs(user["id"])
+    else:
+      userprefs = None
+    
+    if userprefs:
+      current_location = userprefs.location_id
+      
+    template = template_env.get_template('friends.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,      
+      'user': user,
+      'userprefs': userprefs,
+      'friends_list': friends_list,
+    }
+    self.response.out.write(template.render(context))
 
 class LogoutHandler(BaseHandler):
   def get(self):
@@ -204,7 +236,8 @@ class PrefsPage(BaseHandler):
     self.redirect('/')
 
 application = webapp2.WSGIApplication(
-  [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage)],
+  [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage), 
+   ('/friends', FriendsPage)],
   config=config,
   debug=True)
 

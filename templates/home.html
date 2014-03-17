@@ -2,14 +2,10 @@
 {% block title %}Locations{% endblock %}
 {% block content %}
       {% if user %}
-        <p>Your {{ friends_count }} friends are located in...</p>
+        <p>Locations of {{ friends_count }} friends.</p>
         <ul>
         {% for key,value in locations.items() %}
-          {% if value.count == 1 %}
-            <li>{{ value.count }} lives in {{ value.name }}</li>
-          {% else %}
-            <li>{{ value.count }} live in {{ value.name }}</li>
-          {% endif %}
+          <li>{{ value.count }} in {{ value.name }}</li>
         {% endfor %}
         </ul>
         <form action="/prefs" method="post">

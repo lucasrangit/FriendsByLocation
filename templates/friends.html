@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Friends{% endblock %}
+{% block content %}
+	{% if user %}
+		<p>{{ friends_count }} at {{ userprefs.location_name }}</p>	
+		<ul>
+  		{% for friend in friends_list %}
+    		<li>{{ friend.name }}</li>
+    	{% endfor %}
+  	</ul>
+	{% endif %}
+{% endblock %}
