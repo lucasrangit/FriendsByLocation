@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W4C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link href="/static/glike.css" rel="stylesheet" type="text/css" />
+    <title>{% block title %}{% endblock %} - Facebook Friends by Location</title>
+		{% block head %}{% endblock %}
+  </head>
+  <body>
+    <div id="header">
+      {% if user %}
+        <a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
+        <h1>Hello, {{ user.name|escape }}</h1>
+      {% else %}
+        <h1>Hello, sign it to continue.</h1>
+      {% endif %}
+      <p style="float: right; vertical-align: middle; margin: 0; padding: 0; margin-top: 5px;"><fb:login-button autologoutlink="true" scope="publish_stream,user_location,friends_location"></fb:login-button></p>
+    </div>
+		<div id="content">{% block content %}{% endblock %}</div>	
+		<div id="footer">
+    	{% block footer %}
+    		&copy; Copyright 2014 by <a href="http://robotnyc.com/">Robotnyc, LLC.</a>
+    	{% endblock %}
+  	</div>
+    <div id="fb-root"></div>
+    <script type="text/javascript">
+      /* <![cdata[ */
+      window.fbasyncinit = function() {
+        fb.init({appid: '{{ facebook_app_id }}', status: true, cookie: true,
+                 xfbml: true});
+        fb.event.subscribe('{% if user %}auth.logout{% else %}auth.login{% endif %}', function(response) {
+          {% if user %} window.location = "/logout" {% else %} window.location.reload(); {% endif %}
+        });
+      };
+      (function() {
+        var e = document.createelement('script');
+        e.type = 'text/javascript';
+        e.src = document.location.protocol + '//connect.facebook.net/en_us/all.js';
+        e.async = true;
+        document.getelementbyid('fb-root').appendchild(e);
+      }());
+      /* ]]> */
+    </script>
+  </body>
+</html>
+

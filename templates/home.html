@@ -1,20 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Facebook Friends by Location...</title>
-    <link href="/static/glike.css" rel="stylesheet" type="text/css" />
-  </head>
-  <body>
-    <div id="header">
-      {% if user %}
-        <a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
-        <h1>Hello, {{ user.name|escape }}</h1>
-      {% else %}
-        <h1>Hello, sign it to continue.</h1>
-      {% endif %}
-      <p style="float: right; vertical-align: middle; margin: 0; padding: 0; margin-top: 5px;"><fb:login-button autologoutlink="true" scope="publish_stream,user_location,friends_location"></fb:login-button></p>
-    </div>
+{% extends "base.html" %}
+{% block title %}Locations{% endblock %}
+{% block head %}
+  <style type="text/css">
+    .important {
+      color: #336699;
+    }
+  </style>
+{% endblock %}
+{% block content %}
     <div id="content">
       {% if user %}
         <p>Your {{ friends_count }} friends are located in...</p>
@@ -31,7 +24,7 @@
       {% if user %}
         <form action="/prefs" method="post">
           <label for="location">
-            Filter by location:
+            Select location:
           </label>
           <select name="location">
             {% for key,value in locations.items() %}
@@ -42,24 +35,4 @@
         </form>
       {% endif %}
     </div>
-    <div id="fb-root"></div>
-    <script type="text/javascript">
-      /* <![CDATA[ */
-      window.fbAsyncInit = function() {
-        FB.init({appId: '{{ facebook_app_id }}', status: true, cookie: true,
-                 xfbml: true});
-        FB.Event.subscribe('{% if user %}auth.logout{% else %}auth.login{% endif %}', function(response) {
-          {% if user %} window.location = "/logout" {% else %} window.location.reload(); {% endif %}
-        });
-      };
-      (function() {
-        var e = document.createElement('script');
-        e.type = 'text/javascript';
-        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-        e.async = true;
-        document.getElementById('fb-root').appendChild(e);
-      }());
-      /* ]]> */
-    </script>
-  </body>
-</html>
+{% endblock %}
