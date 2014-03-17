@@ -1,14 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Locations{% endblock %}
-{% block head %}
-  <style type="text/css">
-    .important {
-      color: #336699;
-    }
-  </style>
-{% endblock %}
 {% block content %}
-    <div id="content">
       {% if user %}
         <p>Your {{ friends_count }} friends are located in...</p>
         <ul>
@@ -20,8 +12,6 @@
           {% endif %}
         {% endfor %}
         </ul>
-      {% endif %}
-      {% if user %}
         <form action="/prefs" method="post">
           <label for="location">
             Select location:
@@ -34,5 +24,4 @@
           <input type="submit" />
         </form>
       {% endif %}
-    </div>
 {% endblock %}
