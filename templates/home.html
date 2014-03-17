@@ -18,7 +18,12 @@
           </label>
           <select name="location">
             {% for key,value in locations.items() %}
-              <option value="{{ key }}">{{ value.name }}</option>
+              <option value="{{ key }}" 
+								{% ifequal userprefs.location_id key %}
+									selected="selected"
+								{% endifequal %}
+								>{{ value.name }}
+							</option>
             {% endfor %}
           </select>
           <input type="submit" />
