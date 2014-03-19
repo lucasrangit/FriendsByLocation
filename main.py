@@ -184,17 +184,7 @@ class FriendsPage(BaseHandler):
   def get(self):
     user = self.current_user
     friends_list = list()
-    if user:
-      graph = facebook.GraphAPI(user["access_token"])
-      # friends_of_friends = graph.fql("SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))")	
-      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
-      #logging.info(friends)
-      
-      for profile in friends['data']:
-        #logging.info(profile)
-				friends_list.append(profile)
-      #logging.info(locations)
-      
+
     if user:
       userprefs = models.get_userprefs(user["id"])
     else:
@@ -202,6 +192,17 @@ class FriendsPage(BaseHandler):
     
     if userprefs:
       current_location = userprefs.location_id
+
+    if user:
+      graph = facebook.GraphAPI(user["access_token"])
+      # friends_of_friends = graph.fql("SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))")	
+      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))	
+      #logging.info(friends)
+      
+      for profile in friends['data']:
+        #logging.info(profile)
+				friends_list.append(profile)
+      #logging.info(locations)
       
     template = template_env.get_template('friends.html')
     context = {
@@ -232,8 +233,10 @@ class PrefsPage(BaseHandler):
     except ValueError:
       # user entered value that was not integer
       pass # ignore
-      
-    self.redirect('/')
+      self.redirect('/')
+
+    self.redirect('/friends')
+
 
 application = webapp2.WSGIApplication(
   [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage), 
