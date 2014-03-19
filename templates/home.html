@@ -15,9 +15,9 @@
           <select name="location">
             {% for key,value in locations.items() %}
               <option value="{{ key }}" 
-								{% ifequal userprefs.location_id key %}
+								{% if userprefs.location_id == key %}
 									selected="selected"
-								{% endifequal %}
+								{% endif %}
 								>{{ value.name }}
 							</option>
             {% endfor %}

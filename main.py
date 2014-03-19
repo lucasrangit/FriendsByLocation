@@ -179,9 +179,9 @@ class MainPage(BaseHandler):
                  "photo.php?fbid={0}".format(response['id']))
     self.redirect(str(photo_url))
 
-class FriendsPage(BaseHandler)
+class FriendsPage(BaseHandler):
 
-	def get(self):
+  def get(self):
     user = self.current_user
     friends_list = list()
     if user:
