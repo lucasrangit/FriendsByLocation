@@ -184,6 +184,7 @@ class FriendsPage(BaseHandler):
   def get(self):
     user = self.current_user
     friends_list = list()
+    location_name = None
 
     if user:
       userprefs = models.get_userprefs(user["id"])
@@ -191,25 +192,21 @@ class FriendsPage(BaseHandler):
       userprefs = None
     
     if userprefs:
-      current_location = userprefs.location_id
-
-    if user:
       graph = facebook.GraphAPI(user["access_token"])
-      # friends_of_friends = graph.fql("SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))")	
-      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))	
-      #logging.info(friends)
+      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
+      location_name = graph.fql("SELECT name FROM place WHERE page_id=" + str(userprefs.location_id))['data'][0]['name']
+      logging.info(location_name)
       
       for profile in friends['data']:
-        #logging.info(profile)
-				friends_list.append(profile)
-      #logging.info(locations)
-      
+        friends_list.append(profile)
+
     template = template_env.get_template('friends.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,      
       'user': user,
       'userprefs': userprefs,
       'friends_list': friends_list,
+      'location_name': location_name,
     }
     self.response.out.write(template.render(context))
 

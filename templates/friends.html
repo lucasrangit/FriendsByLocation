@@ -2,7 +2,7 @@
 {% block title %}Friends{% endblock %}
 {% block content %}
 	{% if user %}
-		<p>{{ friends_list|length }} friend(s) at {{ userprefs.location_id }}.</p>	
+		<p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
 		<ul>
   		{% for friend in friends_list %}
     		<li>{{ friend.name }}</li>
