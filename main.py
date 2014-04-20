@@ -198,7 +198,6 @@ class FriendsPage(BaseHandler):
       logging.info(location_name)
 
       for profile in friends['data']:
-        logging.info(profile['uid'])
         friends_list.append(profile)
         friends_list_uid.append(str(profile['uid']))
 
