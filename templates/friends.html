@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Friends{% endblock %}
+{% block head %}
+{% endblock %}
 {% block content %}
 	{% if user %}
 		<p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
@@ -9,4 +11,25 @@
     	{% endfor %}
   	</ul>
 	{% endif %}
+  <p></p>
+  <p>Ask your friends in {{ location_name }} to show you more people to connect with:</p>
+  <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people in {{ location_name }} while I'm traveling.">Send Requests</a>
+  <script type="text/javascript">
+    $('#sendRequest').click(function() {
+      FB.ui(
+        {
+          method  : 'apprequests',
+          message : $(this).attr('data-message'),
+          filters : ['app_non_users'],
+          to      : {{ friends_list_uid }}
+        },
+        function (response) {
+          // If response is null the user canceled the dialog
+          if (response != null) {
+            console.log(response);
+          }
+        }
+      );
+    });
+  </script>
 {% endblock %}

@@ -24,7 +24,6 @@ config['webapp2_extras.sessions'] = dict(secret_key='')
 template_env = jinja2.Environment(
   loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'templates')))
 
-
 class User(db.Model):
     id = db.StringProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
@@ -184,10 +183,11 @@ class FriendsPage(BaseHandler):
   def get(self):
     user = self.current_user
     friends_list = list()
+    friends_list_uid = list()
     location_name = None
 
     if user:
-      userprefs = models.get_userprefs(user["id"])
+      userprefs = models.get_userprefs(user['id'])
     else:
       userprefs = None
     
@@ -196,16 +196,19 @@ class FriendsPage(BaseHandler):
       friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
       location_name = graph.fql("SELECT name FROM place WHERE page_id=" + str(userprefs.location_id))['data'][0]['name']
       logging.info(location_name)
-      
+
       for profile in friends['data']:
+        logging.info(profile['uid'])
         friends_list.append(profile)
+        friends_list_uid.append(str(profile['uid']))
 
     template = template_env.get_template('friends.html')
     context = {
-      'facebook_app_id': FACEBOOK_APP_ID,      
+      'facebook_app_id': FACEBOOK_APP_ID,
       'user': user,
       'userprefs': userprefs,
       'friends_list': friends_list,
+      'friends_list_uid': friends_list_uid,
       'location_name': location_name,
     }
     self.response.out.write(template.render(context))
