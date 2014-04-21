@@ -146,7 +146,6 @@ class MainPage(BaseHandler):
     friends_count = 0
     if user:
       graph = facebook.GraphAPI(user["access_token"])
-      # friends_of_friends = graph.fql("SELECT uid, name FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me() ) and is_app_user=1))")	
       friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
       #logging.info(friends)
       
@@ -200,6 +199,7 @@ class FriendsPage(BaseHandler):
     friends_list = list()
     friends_list_uid = list()
     location_name = None
+    friends_friends_list = list()
 
     if user:
       userprefs = models.get_userprefs(user['id'])
@@ -208,13 +208,21 @@ class FriendsPage(BaseHandler):
     
     if userprefs:
       graph = facebook.GraphAPI(user["access_token"])
+
       friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
+
       location_name = graph.fql("SELECT name FROM place WHERE page_id=" + str(userprefs.location_id))['data'][0]['name']
       logging.info(location_name)
 
       for profile in friends['data']:
         friends_list.append(profile)
         friends_list_uid.append(str(profile['uid']))
+
+      friends_of_friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user=1)) AND " + str(userprefs.location_id) + " in current_location.id")
+      # FIXME filter out 1st degree friends
+      logging.info(friends_of_friends)
+      for profile in friends_of_friends['data']:
+        friends_friends_list.append(profile)
 
     template = template_env.get_template('friends.html')
     context = {
@@ -224,6 +232,7 @@ class FriendsPage(BaseHandler):
       'friends_list': friends_list,
       'friends_list_uid': friends_list_uid,
       'location_name': location_name,
+      'friends_friends_list': friends_friends_list,
     }
     self.response.out.write(template.render(context))
 
