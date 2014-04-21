@@ -60,7 +60,7 @@ class BaseHandler(webapp2.RequestHandler):
             # To workaround "HTTPError: HTTP Error 400: Bad Request" 
             # in get_access_token_from_code() uncomment:
             #return None
-            logging.info("Check if user is logged in.")
+            logging.info("Check if user is logged in to Facebook.")
             # Either used just logged in or just saw the first page
             # We'll see here
             cookie = facebook.get_user_from_cookie(self.request.cookies,
@@ -72,22 +72,37 @@ class BaseHandler(webapp2.RequestHandler):
                 user = User.get_by_key_name(cookie["uid"])
                 logging.info("Cookie found, user is logged in.")
                 if not user:
-                    # Not an existing user so get user info
+                    logging.info('New app user')
                     graph = facebook.GraphAPI(cookie["access_token"])
-                    
+
+                    # replace with long live access token
+                    token_full = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)
+                    token = token_full['access_token']
+                    #logging.info('old token expires ' + cookie['expires'])
+                    #logging.info('new token expires ' + token_full['expires'])
+                    graph.access_token = token
+
+                    # save user in objectstore
                     profile = graph.get_object("me")
-                    
                     user = User(
                         key_name=str(profile["id"]),
                         id=str(profile["id"]),
                         name=profile["name"],
                         profile_url=profile["link"],
-                        access_token=cookie["access_token"],
+                        access_token=token,
                     )
                     user.put()
                 elif user.access_token != cookie["access_token"]:
-                    user.access_token = cookie["access_token"]
+                    logging.info('Existing app user with new access token')
+                    # get long live token
+                    graph = facebook.GraphAPI(cookie["access_token"])
+                    token = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)['access_token']
+                    graph.access_token = token
+                    # TODO how to update existing cookie, unless it is okay to keep extending
+                    # save user in objectstore
+                    user.access_token = token
                     user.put()
+
                 # User is now logged in
                 self.session["user"] = dict(
                     name=user.name,
