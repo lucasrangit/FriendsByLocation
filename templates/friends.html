@@ -7,14 +7,14 @@
 		<p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
 		<ul>
   		{% for friend in friends_list %}
-        <li><a href="{{ friend.profile_url }}"><img src="https://graph.facebook.com/{{ friend.uid }}/picture?type=square" style="width:50px;height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a></li>
+        <li><a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="width:50px;height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a></li>
     	{% endfor %}
   	</ul>
     <p>Ask your friends in {{ location_name }} to show you more people to connect with: <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people in {{ location_name }} while I'm traveling.">Send Requests</a></p>
     <p>Friends of friends who have authorized this app in {{ location_name }}: {{ friends_friends_list|length }}</p>
     <ul>
       {% for friend in friends_friends_list %}
-        <li><a href="{{ friend.profile_url }}"><img src="https://graph.facebook.com/{{ friend.uid }}/picture?type=square" style="width:50px;height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a></li>
+        <li><a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="width:50px;height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a></li>
       {% endfor %}
     </ul>
 	{% endif %}
