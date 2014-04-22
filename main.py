@@ -218,7 +218,7 @@ class FriendsPage(BaseHandler):
         friends_list.append(profile)
         friends_list_uid.append(str(profile['uid']))
 
-      friends_of_friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user=1)) AND " + str(userprefs.location_id) + " in current_location.id")
+      friends_of_friends = graph.fql("SELECT uid, name, profile_url, current_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user=1)) AND " + str(userprefs.location_id) + " in current_location.id")
       # FIXME filter out 1st degree friends
       logging.info(friends_of_friends)
       for profile in friends_of_friends['data']:
