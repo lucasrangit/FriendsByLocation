@@ -209,7 +209,7 @@ class FriendsPage(BaseHandler):
     if userprefs:
       graph = facebook.GraphAPI(user["access_token"])
 
-      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
+      friends = graph.fql("SELECT uid, name, profile_url, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
       location_name = graph.fql("SELECT name FROM place WHERE page_id=" + str(userprefs.location_id))['data'][0]['name']
       logging.info(location_name)
