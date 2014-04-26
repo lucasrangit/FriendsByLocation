@@ -220,6 +220,7 @@ class FriendsPage(BaseHandler):
 
       friends_of_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user=1)) AND " + str(userprefs.location_id) + " in current_location.id AND NOT (uid=me())")
       # FIXME filter out 1st degree friends
+      # AND NOT uid IN (SELECT uid1 FROM friend WHERE uid2 = me())
       logging.info(friends_of_friends)
       for profile in friends_of_friends['data']:
         friends_friends_list.append(profile)
