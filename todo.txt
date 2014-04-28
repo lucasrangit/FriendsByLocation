@@ -1,14 +1,10 @@
-
-Insert submit button to form.
-
 Logout from any page or on error.
 
-location > hometown (don't use)
-  ("Lives in" > "last known location" if when) 
- 
-Hide users with unknown location
-
-Requests taking too long
+New workflow for friends of friends
+1. Traveller invites Connector
+2. Connector accepts request
+3. Connector selects Locals for Traveller
+4. Traveller views list of friends by location and friends of friends by location
 
 LATER
 
