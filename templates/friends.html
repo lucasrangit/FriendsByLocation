@@ -25,7 +25,7 @@
           method  : 'apprequests',
           message : $(this).attr('data-message'),
           filters : ['app_non_users'],
-          //to      : {{ friends_list_uid }}
+          to      : [{name: '{{ location_name }} friends', user_ids: '{{ friends_list_uid }}'}],
         },
         function (response) {
           // If response is null the user canceled the dialog
