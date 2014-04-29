@@ -25,8 +25,8 @@
           method  : 'apprequests',
           title   : 'Invite people to connect through',
           message : $(this).attr('data-message'),
-          filters : ['app_non_users'],
-          to      : [{name: '{{ location_name }} friends', user_ids: '{{ friends_list_uid }}'}],
+          //filters : ['app_non_users'],
+          filters : [{name: '{{ location_name }} friends', user_ids: {{ friends_list_uid }}}],
         },
         function (response) {
           // If response is null the user canceled the dialog
