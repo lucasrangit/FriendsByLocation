@@ -2,21 +2,55 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link href="/static/glike.css" rel="stylesheet" type="text/css" />
+    <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css" />
     <title>{% block title %}{% endblock %} - Facebook Friends by Location</title>
-    <script type="text/javascript" src="static/js/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="static/bootstrap/js/bootstrap.js"></script>
 		{% block head %}{% endblock %}
   </head>
   <body>
-    <div id="header">
+
+    <div class="navbar navbar-inverse" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">Friends by Location</a>
+        </div>
+        <div class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="starter-template">
       {% if user %}
-        <a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
         <h1>Hello, {{ user.name|escape }}</h1>
       {% else %}
         <h1>Hello, sign it to continue.</h1>
       {% endif %}
-      <p style="float: right; vertical-align: middle; margin: 0; padding: 0; margin-top: 5px;"><fb:login-button autologoutlink="true" scope="read_stream,export_stream,publish_checkins,publish_stream,user_location,friends_location,public_profile,basic_info,user_friends"></fb:login-button></p>
+        <p class="lead">Find your friends by location and ask friends to suggest new ones .</p>
+      </div>
+
+    </div><!-- /.container -->
+
+    <div class="container">
+      {% if user %}
+        <a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
+      {% endif %}
+      <p><fb:login-button autologoutlink="true" scope="read_stream,export_stream,publish_checkins,publish_stream,user_location,friends_location,public_profile,basic_info,user_friends"></fb:login-button></p>
     </div>
+
     <div id="fb-root"></div>
     <script type="text/javascript">
 		//<![CDATA[
@@ -36,7 +70,7 @@
       }());
     //]]>
     </script>
-    <div id="content">{% block content %}{% endblock %}</div>
+    <div class="container" id="content">{% block content %}{% endblock %}</div>
   </body>
 </html>
 
