@@ -2,12 +2,23 @@
 {% block title %}Locations{% endblock %}
 {% block content %}
       {% if user %}
+
         <p>Locations of {{ friends_count }} friends.</p>
-        <ul>
-        {% for key,value in locations.items() %}
-          <li>{{ value.count }} in {{ value.name }}</li>
-        {% endfor %}
-        </ul>
+
+        <div class="row">
+         <div class="col-md-6">
+
+          <ul class="list-group">
+            {% for key,value in locations.items() %}
+              <li class="list-group-item">
+                <span class="badge">{{ value.count }}</span>
+                {{ value.name }}
+              </li>
+            {% endfor %}
+          </ul>
+          </div>
+        </div>
+
         <form action="/prefs" method="post">
           <label for="location">
             Filter by location:
