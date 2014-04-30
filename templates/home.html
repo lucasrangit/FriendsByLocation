@@ -3,10 +3,17 @@
 {% block content %}
       {% if user %}
 
-        <p>Locations of {{ friends_count }} friends.</p>
+      <div class="container-fluid">
 
-        <div class="row">
-         <div class="col-md-6">
+        <div class="row-fluid">
+
+          <p>Known locations of {{ friends_count }} friends.</p>
+
+        </div>
+
+        <div class="row-fluid">
+
+          <div class="col-md-6">
 
           <ul class="list-group">
             {% for key,value in locations.items() %}
@@ -16,12 +23,16 @@
               </li>
             {% endfor %}
           </ul>
+
           </div>
+
         </div>
+
+        <div class="row-fluid">
 
         <form action="/prefs" method="post">
           <label for="location">
-            Filter by location:
+            Filter location:
           </label>
           <select name="location">
             {% for key,value in locations.items() %}
@@ -35,5 +46,11 @@
           </select>
           <input type="submit" />
         </form>
+
+        </div>
+
+      </div>
+
+    </div<
       {% endif %}
 {% endblock %}
