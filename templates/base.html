@@ -6,6 +6,7 @@
     <title>{% block title %}{% endblock %} - Facebook Friends by Location</title>
     <script type="text/javascript" src="static/js/jquery.min.js"></script>
     <script type="text/javascript" src="static/bootstrap/js/bootstrap.js"></script>
+    <!-- add theme -->
 		{% block head %}{% endblock %}
   </head>
   <body>
@@ -20,6 +21,9 @@
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href="/">Friends by Location</a>
+        </div>
+        <div class="nav navbar-right">
+          <p><fb:login-button autologoutlink="true" scope="read_stream,export_stream,publish_checkins,publish_stream,user_location,friends_location,public_profile,basic_info,user_friends"></fb:login-button></p>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
@@ -48,7 +52,6 @@
       {% if user %}
         <a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>
       {% endif %}
-      <p><fb:login-button autologoutlink="true" scope="read_stream,export_stream,publish_checkins,publish_stream,user_location,friends_location,public_profile,basic_info,user_friends"></fb:login-button></p>
     </div>
 
     <div id="fb-root"></div>
