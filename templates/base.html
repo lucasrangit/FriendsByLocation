@@ -11,6 +11,26 @@
   </head>
   <body>
 
+    <div id="fb-root"></div>
+    <script type="text/javascript">
+		//<![CDATA[
+      window.fbAsyncInit = function() {
+        FB.init({appId: '{{ facebook_app_id }}', status: true, cookie: true,
+                 xfbml: true});
+        FB.Event.subscribe('{% if current_user %}auth.logout{% else %}auth.login{% endif %}', function(response) {
+          {% if current_user %} window.location = "/logout" {% else %} window.location.reload(); {% endif %}
+        });
+      };
+      (function() {
+        var e = document.createElement('script');
+        e.type = 'text/javascript';
+        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
+        e.async = true;
+        document.getElementById('fb-root').appendChild(e);
+      }());
+    //]]>
+    </script>
+
     <div class="navbar navbar-inverse" role="navigation">
       <div class="container">
         <div class="navbar-header">
@@ -22,9 +42,9 @@
           </button>
           <a class="navbar-brand" href="/">Friends by Location</a>
         </div>
-        <p class="navbar-text navbar-right">
-          <fb:login-button autologoutlink="true" scope="read_stream,export_stream,publish_checkins,publish_stream,user_location,friends_location,public_profile,basic_info,user_friends"></fb:login-button>
-        </p>
+        <div class="navbar-text navbar-right">
+          <div class="fb-login-button" data-size="large" data-show-faces="false" data-auto-logout-link="true" data-scope="read_stream,export_stream,publish_checkins,publish_stream,user_location,friends_location,public_profile,basic_info,user_friends"></div>
+        </div>
         <div class="navbar-header navbar-right">
 
         </div>
@@ -57,26 +77,8 @@
       {% endif %}
     </div>
 
-    <div id="fb-root"></div>
-    <script type="text/javascript">
-		//<![CDATA[
-      window.fbAsyncInit = function() {
-        FB.init({appId: '{{ facebook_app_id }}', status: true, cookie: true,
-                 xfbml: true});
-        FB.Event.subscribe('{% if current_user %}auth.logout{% else %}auth.login{% endif %}', function(response) {
-          {% if current_user %} window.location = "/logout" {% else %} window.location.reload(); {% endif %}
-        });
-      };
-      (function() {
-        var e = document.createElement('script');
-        e.type = 'text/javascript';
-        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-        e.async = true;
-        document.getElementById('fb-root').appendChild(e);
-      }());
-    //]]>
-    </script>
     <div class="container" id="content">{% block content %}{% endblock %}</div>
+
   </body>
 </html>
 
