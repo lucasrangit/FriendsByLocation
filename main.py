@@ -219,12 +219,13 @@ class FriendsPage(BaseHandler):
         friends_list_uid.append(str(profile['uid']))
       friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
-      friends_of_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user=1)) AND " + str(userprefs.location_id) + " in current_location.id AND NOT (uid=me())")
-      # FIXME filter out 1st degree friends
-      # AND NOT uid IN (SELECT uid1 FROM friend WHERE uid2 = me())
-      logging.info(friends_of_friends)
-      for profile in friends_of_friends['data']:
-        friends_friends_list.append(profile)
+      # look up friends of friends that are app users
+      app_user_friends_list = graph.fql("SELECT uid, name, pic_small FROM user WHERE is_app_user=1 AND uid IN (SELECT uid2 FROM friend WHERE uid1 = me())")
+      # look up friend's friends at current location
+      for profile in app_user_friends_list['data']:
+        logging.info(profile)
+        app_friends_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id))
+        logging.info(app_friends_friends)
 
     template = template_env.get_template('friends.html')
     context = {
@@ -234,6 +235,7 @@ class FriendsPage(BaseHandler):
       'friends_list': friends_list,
       'friends_list_uid': friends_list_uid,
       'location_name': location_name,
+      'app_user_friends_list': app_user_friends_list,
       'friends_friends_list': friends_friends_list,
     }
     self.response.out.write(template.render(context))
