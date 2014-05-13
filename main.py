@@ -200,6 +200,7 @@ class FriendsPage(BaseHandler):
     friends_list_uid = list()
     location_name = None
     friends_friends_list = list()
+    app_user_friends_list = list()
 
     if user:
       userprefs = models.get_userprefs(user['id'])
@@ -219,13 +220,22 @@ class FriendsPage(BaseHandler):
         friends_list_uid.append(str(profile['uid']))
       friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
-      # look up friends of friends that are app users
-      app_user_friends_list = graph.fql("SELECT uid, name, pic_small FROM user WHERE is_app_user=1 AND uid IN (SELECT uid2 FROM friend WHERE uid1 = me())")
-      # look up friend's friends at current location
-      for profile in app_user_friends_list['data']:
-        logging.info(profile)
-        app_friends_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id))
-        logging.info(app_friends_friends)
+        user_friend = User.get_by_key_name(str(profile['uid']))
+        if not user_friend:
+          continue
+
+        graph_friend = facebook.GraphAPI(user_friend.access_token)
+
+        # look up friends of friends that are app users
+        #app_user_friends_list = graph_friend.fql("SELECT uid, name, pic_small FROM user WHERE is_app_user=1 AND uid IN (SELECT uid2 FROM friend WHERE uid1 = me())")
+        # look up friend's friends at current location
+        app_friends_friends = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id))
+        logging.info(str(profile['name']) + " local friends:")
+        logging.info(app_friends_friends['data'])
+
+        for profile in app_friends_friends['data']:
+          friends_friends_list.append(profile)
+
 
     template = template_env.get_template('friends.html')
     context = {
