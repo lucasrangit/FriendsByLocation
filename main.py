@@ -209,17 +209,17 @@ class FriendsPage(BaseHandler):
     if userprefs:
       graph = facebook.GraphAPI(user["access_token"])
 
-      friends = graph.fql("SELECT uid, name, profile_url, pic_square, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
+      friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
       location_name = graph.fql("SELECT name FROM place WHERE page_id=" + str(userprefs.location_id))['data'][0]['name']
       logging.info(location_name)
 
       for profile in friends['data']:
         friends_list.append(profile)
-        friends_list_uid.append(str(profile['uid'])))
-      friends = graph.fql("SELECT uid, name, profile_url, pic_square, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
+        friends_list_uid.append(str(profile['uid']))
+      friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
-      friends_of_friends = graph.fql("SELECT uid, name, profile_url, pic_square, current_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user=1)) AND " + str(userprefs.location_id) + " in current_location.id AND NOT (uid=me())")
+      friends_of_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 IN (SELECT uid FROM user WHERE uid IN (SELECT uid2 FROM friend WHERE uid1 = me()) AND is_app_user=1)) AND " + str(userprefs.location_id) + " in current_location.id AND NOT (uid=me())")
       # FIXME filter out 1st degree friends
       # AND NOT uid IN (SELECT uid1 FROM friend WHERE uid2 = me())
       logging.info(friends_of_friends)
