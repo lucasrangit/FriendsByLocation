@@ -226,15 +226,13 @@ class FriendsPage(BaseHandler):
 
         graph_friend = facebook.GraphAPI(user_friend.access_token)
 
-        # look up friends of friends that are app users
-        #app_user_friends_list = graph_friend.fql("SELECT uid, name, pic_small FROM user WHERE is_app_user=1 AND uid IN (SELECT uid2 FROM friend WHERE uid1 = me())")
         # look up friend's friends at current location
         app_friends_friends = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id))
         logging.info(str(profile['name']) + " local friends:")
         logging.info(app_friends_friends['data'])
 
-        for profile in app_friends_friends['data']:
-          friends_friends_list.append(profile)
+        for profile_friend in app_friends_friends['data']:
+          friends_friends_list.append(profile_friend)
 
 
     template = template_env.get_template('friends.html')
