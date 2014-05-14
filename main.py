@@ -220,7 +220,7 @@ class FriendsPage(BaseHandler):
 
         user_friend = User.get_by_key_name(str(profile['uid']))
         if not user_friend:
-          friends_list_uid.append(str(profile['uid']))          
+          friends_list_uid.append(str(profile['uid']))
           continue
 
         graph_friend = facebook.GraphAPI(user_friend.access_token)
