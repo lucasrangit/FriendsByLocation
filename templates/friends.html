@@ -5,10 +5,14 @@
 {% block content %}
   {% if user %}
 
-    <p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
-
-        <div class="row">
-         <div class="col-md-6">
+  <div class="row">
+    <div class="col-md-6 col-sm-6">
+      <p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
+      <div class="alert alert-info">
+        <span class="glyphicon glyphicon-info-sign"></span>
+        Your 2nd degree connections are only visible if your 1st degree friend is an app user.
+      </div>
+      <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
 
           <ul class="list-group">
             {% for friend in friends_list %}
@@ -18,30 +22,11 @@
             {% endfor %}
 
           </ul>
-          </div>
-        </div>
-
-    <p>Ask your friends in {{ location_name }} to show you more people to connect with: <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people in {{ location_name }} while I'm traveling.">Send Requests</a></p>
-
-    <p>Friends of friends who have authorized this app in {{ location_name }}: {{ friends_friends_list|length }}</p>
-
-        <div class="row">
-         <div class="col-md-6">
-
-          <ul class="list-group">
-            {% for friend in friends_friends_list %}
-              <li class="list-group-item">
-                <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
-              </li>
-            {% endfor %}
-          </ul>
-          </div>
-        </div>
+    </div>
+  </div>
 
 
-    <ul>
 
-    </ul>
   {% endif %}
 
   <script type="text/javascript">
@@ -52,7 +37,7 @@
           title   : 'Invite people to connect through',
           message : $(this).attr('data-message'),
           //filters : ['app_non_users'],
-          filters : [{name: '{{ location_name|truncate(22, True) }} friends', user_ids: {{ friends_list_uid }}}],
+          filters : [{name: '{{ location_name|truncate(19, True) }} friends', user_ids: {{ friends_list_uid }}}],
         },
         function (response) {
           // If response is null the user canceled the dialog
