@@ -217,11 +217,10 @@ class FriendsPage(BaseHandler):
 
       for profile in friends['data']:
         friends_list.append(profile)
-        friends_list_uid.append(str(profile['uid']))
-      friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
         user_friend = User.get_by_key_name(str(profile['uid']))
         if not user_friend:
+          friends_list_uid.append(str(profile['uid']))          
           continue
 
         graph_friend = facebook.GraphAPI(user_friend.access_token)
