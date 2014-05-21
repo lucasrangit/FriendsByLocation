@@ -147,7 +147,6 @@ class MainPage(BaseHandler):
     if user:
       graph = facebook.GraphAPI(user["access_token"])
       friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
-      #logging.info(friends)
       
       for profile in friends['data']:
         #logging.info(profile)
@@ -198,6 +197,7 @@ class FriendsPage(BaseHandler):
     user = self.current_user
     friends_list = list()
     friends_list_uid = list()
+    friends_with_locals_list = list()
     location_name = None
 
     if user:
@@ -208,11 +208,11 @@ class FriendsPage(BaseHandler):
     if userprefs:
       graph = facebook.GraphAPI(user["access_token"])
 
-      friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
+      friends_local = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
       location_name = graph.fql("SELECT name FROM place WHERE page_id=" + str(userprefs.location_id))['data'][0]['name']
 
-      for profile in friends['data']:
+      for profile in friends_local['data']:
 
         # is the friend an app user?
         user_friend = User.get_by_key_name(str(profile['uid']))
@@ -238,6 +238,30 @@ class FriendsPage(BaseHandler):
 
         friends_list.append(profile)
 
+      # friends from any location with friends at this location
+      friends_not_local = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND NOT (current_location.id=" + str(userprefs.location_id) + ") AND is_app_user=1")
+
+      for profile in friends_not_local['data']:
+        profile['friends'] = list()
+
+        # is the friend an app user?
+        user_friend = User.get_by_key_name(str(profile['uid']))
+
+        # if not, this user no longer has an access token in our database
+        if not user_friend:
+          continue
+
+        # if so, query their friends using the long-lived access token
+        graph_friend = facebook.GraphAPI(user_friend.access_token)
+
+        # look up friend's friends at current location
+        # TODO ignore mutual friends and "me"
+        friends_friend = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id))
+
+        for profile_friend in friends_friend['data']:
+          profile['friends'].append(profile_friend)
+
+        friends_with_locals_list.append(profile)
 
     template = template_env.get_template('friends.html')
     context = {
@@ -246,6 +270,7 @@ class FriendsPage(BaseHandler):
       'userprefs': userprefs,
       'friends_list': friends_list,
       'friends_list_uid': friends_list_uid,
+      'friends_with_locals_list': friends_with_locals_list,
       'location_name': location_name,
     }
     self.response.out.write(template.render(context))

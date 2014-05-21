@@ -7,15 +7,35 @@
 
   <div class="row">
     <div class="col-md-6 col-sm-6">
-      <p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
+
       <div class="alert alert-info">
         <span class="glyphicon glyphicon-info-sign"></span>
         Your 2nd degree connections are only visible if your 1st degree friend is an app user.
       </div>
       <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
 
+      <p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
           <ul class="list-group">
             {% for friend in friends_list %}
+              <li class="list-group-item">
+                <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+                <span class="badge">{{ friend.friends|length }}</span>
+                {% if friend.friends|length > 0 %}
+                <ul class="list-group">
+                {% for friend_of_friend in friend.friends %}
+                  <li class="list-group-item">
+                    <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
+                </li>
+                {% endfor %}
+                </ul>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+
+          <p>Friends <b>with friends</b> in {{ location_name }}: {{ friends_with_locals_list|length }}</p>
+          <ul class="list-group">
+            {% for friend in friends_with_locals_list %}
               <li class="list-group-item">
                 <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
                 <span class="badge">{{ friend.friends|length }}</span>
