@@ -261,7 +261,8 @@ class FriendsPage(BaseHandler):
         for profile_friend in friends_friend['data']:
           profile['friends'].append(profile_friend)
 
-        friends_with_locals_list.append(profile)
+        if len(profile['friends']) > 0:
+          friends_with_locals_list.append(profile)
 
     template = template_env.get_template('friends.html')
     context = {
