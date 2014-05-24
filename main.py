@@ -210,7 +210,9 @@ class FriendsPage(BaseHandler):
 
       friends_local = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
-      location_name = graph.fql("SELECT name FROM place WHERE page_id=" + str(userprefs.location_id))['data'][0]['name']
+      location_id = str(userprefs.location_id)
+      location_graph = graph.fql("SELECT name  FROM place WHERE page_id=" + location_id) 
+      location_name = location_graph['data'][0]['name']
 
       for profile in friends_local['data']:
 

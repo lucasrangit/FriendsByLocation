@@ -19,6 +19,7 @@
             {% for friend in friends_list %}
               <li class="list-group-item">
                 <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+                <span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span>
                 <span class="badge">{{ friend.friends|length }}</span>
                 {% if friend.friends|length > 0 %}
                 <ul class="list-group">
@@ -38,6 +39,7 @@
             {% for friend in friends_with_locals_list %}
               <li class="list-group-item">
                 <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+                <span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span>
                 <span class="badge">{{ friend.friends|length }}</span>
                 {% if friend.friends|length > 0 %}
                 <ul class="list-group">
@@ -55,6 +57,20 @@
   </div>
 
   {% endif %}
+
+
+
+  <script>
+    $('.msg').click(function() {
+      var uid = $(this).attr('id').replace('msg_','');
+      FB.ui({
+        method: 'send',
+        to: uid,
+        name: 'Facebook Dialogs',
+        link: 'https://friendsbylocation.appspot.com/'
+        });
+    });
+  </script>
 
   <script type="text/javascript">
     $('#sendRequest').click(function() {
