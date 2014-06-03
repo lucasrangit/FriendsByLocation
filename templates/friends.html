@@ -19,18 +19,14 @@
             {% for friend in friends_list %}
               <li class="list-group-item">
                 <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
-                <span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span>
-                <a href="https://m.facebook.com/messages/thread/{{ friend.uid }}/">Thread</a>
-                <a href="https://m.facebook.com/messages/compose?ids={{ friend.uid }}/">Compose</a>
+                <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
                 <span class="badge">{{ friend.friends|length }}</span>
                 {% if friend.friends|length > 0 %}
                 <ul class="list-group">
                 {% for friend_of_friend in friend.friends %}
                   <li class="list-group-item">
                     <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
-                    <span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend_of_friend.uid }}"></span>
-                    <a href="https://m.facebook.com/messages/thread/{{ friend_of_friend.uid }}/">Thread</a>
-                    <a href="https://m.facebook.com/messages/compose?ids={{ friend_of_friend.uid }}/">Compose</a>
+                    <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
                 </li>
                 {% endfor %}
                 </ul>
@@ -44,18 +40,14 @@
             {% for friend in friends_with_locals_list %}
               <li class="list-group-item">
                 <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
-                <span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span>
-                <a href="https://m.facebook.com/messages/thread/{{ friend.uid }}/">Thread</a>
-                <a href="https://m.facebook.com/messages/compose?ids={{ friend.uid }}/">Compose</a>
+                <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
                 <span class="badge">{{ friend.friends|length }}</span>
                 {% if friend.friends|length > 0 %}
                 <ul class="list-group">
                 {% for friend_of_friend in friend.friends %}
                   <li class="list-group-item">
                     <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
-                    <span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend_of_friend.uid }}"></span>
-                    <a href="https://m.facebook.com/messages/thread/{{ friend_of_friend.uid }}/">Thread</a>
-                    <a href="https://m.facebook.com/messages/compose?ids={{ friend_of_friend.uid }}/">Compose</a>
+                    <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
                 </li>
                 {% endfor %}
                 </ul>
@@ -71,15 +63,18 @@
 
 
   <script>
-    $('.msg').click(function() {
-      var uid = $(this).attr('id').replace('msg_','');
-      FB.ui({
-        method: 'send',
-        to: uid,
-        name: 'Facebook Dialogs',
-        link: 'https://friendsbylocation.appspot.com/',
-        });
-    });
+    if (!('ontouchstart' in window)) {
+      $(".msg_link").attr('href', '#');
+      $('.msg').click(function() {
+        var uid = $(this).attr('id').replace('msg_','');
+        FB.ui({
+          method: 'send',
+          to: uid,
+          name: 'Facebook Dialogs',
+          link: 'https://friendsbylocation.appspot.com/',
+          });
+      });
+    }
   </script>
 
   <script type="text/javascript">

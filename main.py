@@ -174,7 +174,7 @@ class MainPage(BaseHandler):
       
     template = template_env.get_template('home.html')
     context = {
-      'facebook_app_id': FACEBOOK_APP_ID,      
+      'facebook_app_id': FACEBOOK_APP_ID,
       'user': user,
       'userprefs': userprefs,
       'locations': locations,
