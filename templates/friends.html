@@ -8,10 +8,6 @@
   <div class="row">
     <div class="col-md-6 col-sm-6">
 
-      <div class="alert alert-info">
-        <span class="glyphicon glyphicon-info-sign"></span>
-        Your 2nd degree connections are only visible if your 1st degree friend is an app user.
-      </div>
       <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
 
       <p>1st degree <b>app user</b> friends in {{ location_name }}: {{ friends_local_user|length }}</p>
@@ -55,6 +51,11 @@
           </li>
         {% endfor %}
       </ul>
+
+      <div class="alert alert-info">
+        <span class="glyphicon glyphicon-info-sign"></span>
+        2nd degree connections are only visible through a 1st degree app user.
+      </div>
 
       <p>2nd degree friends in {{ location_name }}: {{ friends_friends_local_not_user|length }}</p>
       <ul class="list-group">
