@@ -250,9 +250,13 @@ class FriendsPage(BaseHandler):
 
         # save the 2nd degree friend and add the current user as a friend
         for profile_friend in friends_friends_local_not_user2['data']:
-          profile_friend['friends'] = list()
-          profile_friend['friends'].append(profile)
-          friends_friends_local_not_user[profile_friend['uid']] = profile_friend
+          if profile_friend['uid'] in friends_friends_local_not_user:
+           friends_friends_local_not_user[profile_friend['uid']]['friends'].append(profile)
+          else:
+            profile_friend['friends'] = list()
+            profile_friend['friends'].append(profile)
+            friends_friends_local_not_user[profile_friend['uid']] = profile_friend
+
 
         friends_list.append(profile)
 
