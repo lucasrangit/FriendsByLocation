@@ -14,47 +14,68 @@
       </div>
       <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
 
-      <p>Friends in {{ location_name }}: {{ friends_list|length }}</p>
-          <ul class="list-group">
-            {% for friend in friends_list %}
+      <p>1st degree <b>app user</b> friends in {{ location_name }}: {{ friends_local_user|length }}</p>
+      <ul class="list-group">
+        {% for friend in friends_local_user %}
+          <li class="list-group-item">
+            <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+            <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
+            <span class="badge">{{ friend.friends|length }}</span>
+            {% if friend.friends|length > 0 %}
+            <ul class="list-group">
+            {% for friend_of_friend in friend.friends %}
               <li class="list-group-item">
-                <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+                <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
                 <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
-                <span class="badge">{{ friend.friends|length }}</span>
-                {% if friend.friends|length > 0 %}
-                <ul class="list-group">
-                {% for friend_of_friend in friend.friends %}
-                  <li class="list-group-item">
-                    <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
-                    <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
-                </li>
-                {% endfor %}
-                </ul>
-                {% endif %}
-              </li>
+            </li>
             {% endfor %}
-          </ul>
+            </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
 
-          <p>Friends <b>with friends</b> in {{ location_name }}: {{ friends_with_locals_list|length }}</p>
-          <ul class="list-group">
-            {% for friend in friends_with_locals_list %}
+      <p>1st degree friends in {{ location_name }}: {{ friends_local_not_user|length }}</p>
+      <ul class="list-group">
+        {% for friend in friends_local_not_user %}
+          <li class="list-group-item">
+            <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+            <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
+            <span class="badge">{{ friend.friends|length }}</span>
+            {% if friend.friends|length > 0 %}
+            <ul class="list-group">
+            {% for friend_of_friend in friend.friends %}
               <li class="list-group-item">
-                <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+                <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
                 <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
-                <span class="badge">{{ friend.friends|length }}</span>
-                {% if friend.friends|length > 0 %}
-                <ul class="list-group">
-                {% for friend_of_friend in friend.friends %}
-                  <li class="list-group-item">
-                    <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
-                    <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
-                </li>
-                {% endfor %}
-                </ul>
-                {% endif %}
-              </li>
+            </li>
             {% endfor %}
-          </ul>
+            </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+
+      <p>2nd degree friends in {{ location_name }}: {{ friends_friends_local_not_user|length }}</p>
+      <ul class="list-group">
+        {% for uid, friend in friends_friends_local_not_user.iteritems() %}
+          <li class="list-group-item">
+            <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+            <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
+            <span class="badge">{{ friend.friends|length }}</span>
+            {% if friend.friends|length > 0 %}
+            <ul class="list-group">
+            {% for friend_of_friend in friend.friends %}
+              <li class="list-group-item">
+                <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
+                <a class="msg_link" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+          </li>
+        {% endfor %}
+        </ul>
     </div>
   </div>
 

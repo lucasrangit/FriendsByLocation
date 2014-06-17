@@ -147,7 +147,6 @@ class MainPage(BaseHandler):
     if user:
       graph = facebook.GraphAPI(user["access_token"])
       friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
-      
       for profile in friends['data']:
         #logging.info(profile)
         friends_count += 1
@@ -197,74 +196,65 @@ class FriendsPage(BaseHandler):
     user = self.current_user
     friends_list = list()
     friends_list_uid = list()
+    friends_local_not_user_uid_list = list()
     friends_with_locals_list = list()
     location_name = None
+
+    friends_local_user = dict()
+    friends_local_not_user = dict()
+    friends_friends_local_user = dict()
+    friends_friends_local_not_user = dict()
 
     if user:
       userprefs = models.get_userprefs(user['id'])
     else:
       userprefs = None
-    
+
     if userprefs:
       graph = facebook.GraphAPI(user["access_token"])
-
-      friends_local = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id))
 
       location_id = str(userprefs.location_id)
       location_graph = graph.fql("SELECT name  FROM place WHERE page_id=" + location_id) 
       location_name = location_graph['data'][0]['name']
 
-      for profile in friends_local['data']:
+      # 1st degree user friends at current location
+      friends_local_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=1")
 
-        # is the friend an app user?
+      # 1st degree non-user friends at current location
+      friends_local_not_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=0")
+
+      # 1st degree friends to invite
+      for profile in friends_local_not_user['data']:
+        friends_local_not_user_uid_list.append(str(profile['uid']))
+
+      # all friends
+      friends_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")
+
+      # find 2nd degree friends at current location
+      # from friends from all locations that are users
+      for profile in friends_user['data']:
+
+        # is the friend a user?
         user_friend = User.get_by_key_name(str(profile['uid']))
 
-        # if not, save as is and add them to the invite list
+        # user not in database
         if not user_friend:
-          friends_list.append(profile)
-          friends_list_uid.append(str(profile['uid']))
           continue
 
-        # if so, query their friends using the long-lived access token
+        # query their friends using the long-lived access token
         graph_friend = facebook.GraphAPI(user_friend.access_token)
 
-        # look up friend's friends at current location
+        # 2nd degree friends at current location
         # TODO ignore mutual friends and "me"
-        friends_friend = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id))
+        friends_friends_local_not_user2 = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=0")
 
-        # create app user friends list
-        profile['friends'] = list()
-
-        for profile_friend in friends_friend['data']:
-          profile['friends'].append(profile_friend)
+        # save the 2nd degree friend and add the current user as a friend
+        for profile_friend in friends_friends_local_not_user2['data']:
+          profile_friend['friends'] = list()
+          profile_friend['friends'].append(profile)
+          friends_friends_local_not_user[profile_friend['uid']] = profile_friend
 
         friends_list.append(profile)
-
-      # friends from any location with friends at this location
-      friends_not_local = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND NOT (current_location.id=" + str(userprefs.location_id) + ") AND is_app_user=1")
-
-      for profile in friends_not_local['data']:
-        profile['friends'] = list()
-
-        # is the friend an app user?
-        user_friend = User.get_by_key_name(str(profile['uid']))
-
-        # if not, this user no longer has an access token in our database
-        if not user_friend:
-          continue
-
-        # if so, query their friends using the long-lived access token
-        graph_friend = facebook.GraphAPI(user_friend.access_token)
-
-        # look up friend's friends at current location
-        # TODO ignore mutual friends and "me"
-        friends_friend = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id))
-
-        for profile_friend in friends_friend['data']:
-          profile['friends'].append(profile_friend)
-
-        if len(profile['friends']) > 0:
-          friends_with_locals_list.append(profile)
 
     template = template_env.get_template('friends.html')
     context = {
@@ -274,6 +264,9 @@ class FriendsPage(BaseHandler):
       'friends_list': friends_list,
       'friends_list_uid': friends_list_uid,
       'friends_with_locals_list': friends_with_locals_list,
+      'friends_local_user': friends_local_user['data'],
+      'friends_local_not_user': friends_local_not_user['data'],
+      'friends_friends_local_not_user': friends_friends_local_not_user,
       'location_name': location_name,
     }
     self.response.out.write(template.render(context))

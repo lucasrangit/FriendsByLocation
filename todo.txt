@@ -25,3 +25,9 @@ User Preferrences
 See More Results?
   Show by hometown
 
+Groups
+
+* Group 1: get first-degree friends that are app users (1DI)
+* Group 2: for each first-degree friend (at current location at otherwise), get second-degree friends that are app users (2DI)
+* Group 3: get first-degree friends that are not app users (1DO)
+* Group 4: for each first-degree friend, get second-degree friends that are not app users (2DO)
