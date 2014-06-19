@@ -143,7 +143,9 @@ class MainPage(BaseHandler):
   def get(self):
     user = self.current_user
     locations = dict()
+    locations_2 = dict()
     friends_count = 0
+    friends_count_2 = 0
     if user:
       graph = facebook.GraphAPI(user["access_token"])
       friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
@@ -162,7 +164,39 @@ class MainPage(BaseHandler):
           else:
             locations[location_id]['count'] += 1
       #logging.info(locations)
-      
+
+      # find locations of second degree friends
+      for profile in friends['data']:
+        # is the friend a user?
+        user_friend = User.get_by_key_name(str(profile['uid']))
+
+        # user not in database
+        if not user_friend:
+          continue
+
+        # query their friends using the long-lived access token
+        graph_friend = facebook.GraphAPI(user_friend.access_token)
+
+        # location of 2nd degree friends
+        friends_friends = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ")")
+        logging.info(friends_friends)
+
+        # save the location of the second degree friends and increment the occurrence count 
+        for profile_friend in friends_friends['data']:
+          if not profile_friend['current_location']:
+            continue
+          else:
+            location_id = profile_friend['current_location']['id']
+            location_name = profile_friend['current_location']['name']
+            if location_id not in locations_2:
+              locations_2[location_id] = dict()
+              locations_2[location_id]['name'] = location_name
+              locations_2[location_id]['count'] = 1
+            else:
+              locations_2[location_id]['count'] += 1
+            friends_count_2 += 1
+        logging.info(locations_2)
+
     if user:
       userprefs = models.get_userprefs(user["id"])
     else:
@@ -177,7 +211,9 @@ class MainPage(BaseHandler):
       'user': user,
       'userprefs': userprefs,
       'locations': locations,
+      'locations_2': locations_2,
       'friends_count': friends_count,
+      'friends_count_2': friends_count_2,
     }
     self.response.out.write(template.render(context))
     
