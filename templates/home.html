@@ -7,15 +7,12 @@
 
         <div class="row-fluid">
 
-          <p>1st degree friends: {{ friends_count }}</p>
-
-        </div>
-
-        <div class="row-fluid">
-
-          <div class="col-md-6">
+          <div class="col-md-4 col-lg-4">
 
             <ul class="list-group">
+              <li class="list-group-item active">
+                <b>1st degree friends: {{ friends_count }}</b>
+              </li>
               {% for key,value in locations.items() %}
                 <li class="list-group-item">
                   <span class="badge">{{ value.count }}</span>
@@ -30,15 +27,12 @@
 
         <div class="row-fluid">
 
-          <p>2nd degree friends: {{ friends_count_2 }}</p>
-
-        </div>
-
-        <div class="row-fluid">
-
-          <div class="col-md-6">
+          <div class="col-md-4 col-lg-4">
 
             <ul class="list-group">
+              <li class="list-group-item active">
+                <b>2nd degree friends: {{ friends_count_2 }}</b>
+              </li>
               {% for key,value in locations_2.items() %}
                 <li class="list-group-item">
                   <span class="badge">{{ value.count }}</span>
