@@ -179,7 +179,6 @@ class MainPage(BaseHandler):
 
         # location of 2nd degree friends
         friends_friends = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ")")
-        logging.info(friends_friends)
 
         # save the location of the second degree friends and increment the occurrence count 
         for profile_friend in friends_friends['data']:
@@ -195,7 +194,6 @@ class MainPage(BaseHandler):
             else:
               locations_2[location_id]['count'] += 1
             friends_count_2 += 1
-        logging.info(locations_2)
 
     if user:
       userprefs = models.get_userprefs(user["id"])
@@ -326,7 +324,6 @@ class PrefsPage(BaseHandler):
     userprefs = models.get_userprefs(user["id"])
     try:
       userprefs.location_id = int(self.request.get('location'))
-      logging.info(userprefs.location_id)
       userprefs.put()
     except ValueError:
       # user entered value that was not integer
