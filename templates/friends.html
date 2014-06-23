@@ -8,7 +8,7 @@
   <div class="row">
     <div class="col-md-6 col-sm-6">
 
-      <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you know in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
+      <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
 
       <p>1st degree <b>app user</b> friends in {{ location_name }}: {{ friends_local_user|length }}</p>
       <ul class="list-group">
@@ -106,8 +106,11 @@
           method  : 'apprequests',
           title   : 'Invite people to connect through',
           message : $(this).attr('data-message'),
-          //filters : ['app_non_users'],
+          {% if friends_local_not_user_uid_list|length > 0 %}
           filters : [{name: '{{ location_name|truncate(19, True) }} friends', user_ids: {{ friends_local_not_user_uid_list }}}],
+          {% else %}
+          filters : ['app_non_users'],
+          {% endif %}
         },
         function (response) {
           // If response is null the user canceled the dialog
