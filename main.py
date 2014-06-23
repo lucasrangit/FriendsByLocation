@@ -229,7 +229,6 @@ class FriendsPage(BaseHandler):
   def get(self):
     user = self.current_user
     friends_list = list()
-    friends_list_uid = list()
     friends_local_not_user_uid_list = list()
     friends_with_locals_list = list()
     location_name = None
@@ -300,7 +299,7 @@ class FriendsPage(BaseHandler):
       'user': user,
       'userprefs': userprefs,
       'friends_list': friends_list,
-      'friends_list_uid': friends_list_uid,
+      'friends_local_not_user_uid_list': friends_local_not_user_uid_list,
       'friends_with_locals_list': friends_with_locals_list,
       'friends_local_user': friends_local_user['data'],
       'friends_local_not_user': friends_local_not_user['data'],
