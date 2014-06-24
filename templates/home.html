@@ -50,10 +50,15 @@
     </div>
     <script>
       $('.location').click(function(){
+            var item = $(this);
+            var text_to_insert = ' <img src="/static/images/loading.gif" /> ';
             $.post(
               "/prefs",
               {
-                location: $(this).attr('data-location-id')
+                location: $(this).attr('data-location-id'),
+                beforeSend: function(){
+                  $(item).append($(text_to_insert));
+                },
               },
               function() {
                   window.location.replace("/friends");
