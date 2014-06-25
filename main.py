@@ -290,7 +290,6 @@ class FriendsPage(BaseHandler):
             profile_friend['friends'].append(profile)
             friends_friends_local_not_user[profile_friend['uid']] = profile_friend
 
-
         friends_list.append(profile)
 
     template = template_env.get_template('friends.html')
