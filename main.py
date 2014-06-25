@@ -138,6 +138,17 @@ class BaseHandler(webapp2.RequestHandler):
         return self.session_store.get_session()
 
 
+def get_friends(graph):
+  """Return the list friends for given GraphAPI client.
+  When modified to not use FQL, paging support will be required."
+  """
+  try:
+    fql_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")
+    return fql_friends['data']
+  except:
+    return list()
+
+
 class MainPage(BaseHandler):
         
   def get(self):
@@ -148,8 +159,8 @@ class MainPage(BaseHandler):
     friends_count_2 = 0
     if user:
       graph = facebook.GraphAPI(user["access_token"])
-      friends = graph.fql("SELECT uid, name, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")	
-      for profile in friends['data']:
+      friends = get_friends(graph)
+      for profile in friends:
         #logging.info(profile)
         friends_count += 1
         if not profile['current_location']:
@@ -166,7 +177,7 @@ class MainPage(BaseHandler):
       #logging.info(locations)
 
       # find locations of second degree friends
-      for profile in friends['data']:
+      for profile in friends:
         # is the friend a user?
         user_friend = User.get_by_key_name(str(profile['uid']))
 
@@ -261,11 +272,11 @@ class FriendsPage(BaseHandler):
         friends_local_not_user_uid_list.append(str(profile['uid']))
 
       # all friends
-      friends_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")
+      friends_user = get_friends(graph)
 
       # find 2nd degree friends at current location
       # from friends from all locations that are users
-      for profile in friends_user['data']:
+      for profile in friends_user:
 
         # is the friend a user?
         user_friend = User.get_by_key_name(str(profile['uid']))
