@@ -141,9 +141,10 @@ class BaseHandler(webapp2.RequestHandler):
 def get_friends(graph):
   """Return the list friends for given GraphAPI client.
   When modified to not use FQL, paging support will be required."
+  Ordered by mutual friends.
   """
   try:
-    fql_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me())")
+    fql_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) ORDER BY mutual_friend_count DESC")
     return fql_friends['data']
   except:
     return list()
@@ -160,6 +161,7 @@ class MainPage(BaseHandler):
     if user:
       graph = facebook.GraphAPI(user["access_token"])
       friends = get_friends(graph)
+      logging.info(friends)
       for profile in friends:
         #logging.info(profile)
         friends_count += 1
@@ -262,10 +264,10 @@ class FriendsPage(BaseHandler):
       location_name = location_graph['data'][0]['name']
 
       # 1st degree user friends at current location
-      friends_local_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=1")
+      friends_local_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=1 ORDER BY mutual_friend_count DESC")
 
       # 1st degree non-user friends at current location
-      friends_local_not_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=0")
+      friends_local_not_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=0 ORDER BY mutual_friend_count DESC")
 
       # 1st degree friends to invite
       for profile in friends_local_not_user['data']:
