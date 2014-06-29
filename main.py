@@ -138,17 +138,32 @@ class BaseHandler(webapp2.RequestHandler):
         return self.session_store.get_session()
 
 
-def get_friends(graph):
-  """Return the list friends for given GraphAPI client.
-  When modified to not use FQL, paging support will be required."
+def get_friends(graph, location_id="", is_user=""):
+  """Return list friends for given GraphAPI client.
+  Optionally filter by location ID and IS or IS NOT application user.
   Ordered by mutual friends.
+  Note: When modified to not use FQL, paging support will be required.
   """
+  user = graph.get_object("me")
+  fql = "SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + user["id"] + ")"
+  if location_id:
+    fql += " AND current_location.id=" + location_id
+  if is_user:
+    fql += " AND is_app_user=" + is_user
+  fql += " ORDER BY mutual_friend_count DESC"
+  logging.info(fql)
   try:
-    fql_friends = graph.fql("SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) ORDER BY mutual_friend_count DESC")
+    fql_friends = graph.fql(fql)
     return fql_friends['data']
   except:
+    logging.error("There was an error retrieving friends of UID %s", user["id"])
     return list()
 
+def get_app_friends(g, l):
+  return get_friends(g, l, "1")
+
+def get_non_app_friends(g, l):
+  return get_friends(g, l, "0")
 
 class MainPage(BaseHandler):
         
@@ -161,7 +176,6 @@ class MainPage(BaseHandler):
     if user:
       graph = facebook.GraphAPI(user["access_token"])
       friends = get_friends(graph)
-      logging.info(friends)
       for profile in friends:
         #logging.info(profile)
         friends_count += 1
@@ -191,10 +205,10 @@ class MainPage(BaseHandler):
         graph_friend = facebook.GraphAPI(user_friend.access_token)
 
         # location of 2nd degree friends
-        friends_friends = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ")")
+        friends_friends = get_friends(graph_friend)
 
         # save the location of the second degree friends and increment the occurrence count 
-        for profile_friend in friends_friends['data']:
+        for profile_friend in friends_friends:
           if not profile_friend['current_location']:
             continue
           else:
@@ -246,8 +260,8 @@ class FriendsPage(BaseHandler):
     friends_with_locals_list = list()
     location_name = None
 
-    friends_local_user = dict()
-    friends_local_not_user = dict()
+    friends_local_user = list()
+    friends_local_not_user = list()
     friends_friends_local_user = dict()
     friends_friends_local_not_user = dict()
 
@@ -260,17 +274,17 @@ class FriendsPage(BaseHandler):
       graph = facebook.GraphAPI(user["access_token"])
 
       location_id = str(userprefs.location_id)
-      location_graph = graph.fql("SELECT name  FROM place WHERE page_id=" + location_id) 
+      location_graph = graph.fql("SELECT name FROM place WHERE page_id=" + location_id)
       location_name = location_graph['data'][0]['name']
 
       # 1st degree user friends at current location
-      friends_local_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=1 ORDER BY mutual_friend_count DESC")
+      friends_local_user = get_app_friends(graph, location_id)
 
       # 1st degree non-user friends at current location
-      friends_local_not_user = graph.fql("SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = me()) AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=0 ORDER BY mutual_friend_count DESC")
+      friends_local_not_user = get_non_app_friends(graph, location_id)
 
       # 1st degree friends to invite
-      for profile in friends_local_not_user['data']:
+      for profile in friends_local_not_user:
         friends_local_not_user_uid_list.append(str(profile['uid']))
 
       # all friends
@@ -292,10 +306,10 @@ class FriendsPage(BaseHandler):
 
         # 2nd degree friends at current location
         # TODO ignore mutual friends and "me"
-        friends_friends_local_not_user2 = graph_friend.fql("SELECT uid, name, profile_url, pic_small, current_location FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + str(profile['uid']) + ") AND current_location.id=" + str(userprefs.location_id) + " AND is_app_user=0")
+        friends_friends_local_not_user2 = get_non_app_friends(graph_friend, location_id)
 
         # save the 2nd degree friend and add the current user as a friend
-        for profile_friend in friends_friends_local_not_user2['data']:
+        for profile_friend in friends_friends_local_not_user2:
           if profile_friend['uid'] in friends_friends_local_not_user:
            friends_friends_local_not_user[profile_friend['uid']]['friends'].append(profile)
           else:
@@ -313,8 +327,8 @@ class FriendsPage(BaseHandler):
       'friends_list': friends_list,
       'friends_local_not_user_uid_list': friends_local_not_user_uid_list,
       'friends_with_locals_list': friends_with_locals_list,
-      'friends_local_user': friends_local_user['data'],
-      'friends_local_not_user': friends_local_not_user['data'],
+      'friends_local_user': friends_local_user,
+      'friends_local_not_user': friends_local_not_user,
       'friends_friends_local_not_user': friends_friends_local_not_user,
       'location_name': location_name,
     }
