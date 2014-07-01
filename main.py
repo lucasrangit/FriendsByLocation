@@ -310,6 +310,10 @@ class FriendsPage(BaseHandler):
 
         # save the 2nd degree friend and add the current user as a friend
         for profile_friend in friends_friends_local_not_user2:
+          # ignore mutual friend
+          # FIXME inefficient, assumes 1st degree list is shorter than 2nd
+          if any(f['uid'] == profile_friend['uid'] for f in friends_user):
+            continue
           if profile_friend['uid'] in friends_friends_local_not_user:
            friends_friends_local_not_user[profile_friend['uid']]['friends'].append(profile)
           else:
