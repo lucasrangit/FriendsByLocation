@@ -1,3 +1,4 @@
+{% set active_page = active_page|default('index') -%}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -50,9 +51,8 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="/">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
+            <li {% if "index" == active_page %} class="active"{% endif %}><a href="/">Home</a></li>
+            <li {% if "about" == active_page %} class="active"{% endif %}><a href="about">About</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>

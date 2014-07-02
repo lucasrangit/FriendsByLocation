@@ -362,9 +362,20 @@ class PrefsPage(BaseHandler):
     self.redirect('/friends')
 
 
+class AboutPage(BaseHandler):
+  def get(self):
+    user = self.current_user
+    template = template_env.get_template('about.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,
+      'user': user,
+    }
+    self.response.out.write(template.render(context))
+
 application = webapp2.WSGIApplication(
   [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage), 
-   ('/friends', FriendsPage)],
+   ('/friends', FriendsPage),
+   ('/about', AboutPage)],
   config=config,
   debug=True)
 
