@@ -151,7 +151,6 @@ def get_friends(graph, location_id="", is_user=""):
   if is_user:
     fql += " AND is_app_user=" + is_user
   fql += " ORDER BY mutual_friend_count DESC"
-  logging.info(fql)
   try:
     fql_friends = graph.fql(fql)
     return fql_friends['data']
