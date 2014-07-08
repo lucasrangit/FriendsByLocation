@@ -5,12 +5,14 @@ import models
 import os
 import webapp2
 import urllib2
+from operator import itemgetter, attrgetter
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
 import secrets
 FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID
 FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET
+GOOGLE_MAPS_API_KEY = secrets.GOOGLE_MAPS_API_KEY
 
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
@@ -228,16 +230,20 @@ class MainPage(BaseHandler):
     
     if userprefs:
       current_location = userprefs.location_id
-      
+
+    locations_list = sorted(locations.items(), key=lambda l: l[1]['name'])
+    locations_list_2 = sorted(locations_2.items(), key=lambda l: l[1]['name'])
+
     template = template_env.get_template('home.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,
       'user': user,
       'userprefs': userprefs,
-      'locations': locations,
-      'locations_2': locations_2,
+      'locations': locations_list,
+      'locations_2': locations_list_2,
       'friends_count': friends_count,
       'friends_count_2': friends_count_2,
+      'google_maps_api_key': GOOGLE_MAPS_API_KEY,
     }
     self.response.out.write(template.render(context))
     
