@@ -46,12 +46,11 @@
             <span class="badge">{{ friend.friends|length }}</span>
             {% if friend.friends|length > 0 %}
             <ul class="list-group">
-            {% for friend_of_friend in friend.friends %}
               <li class="list-group-item">
-                <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend_of_friend.name|escape }}</a>
-                <a class="msg_link" target="_blank" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
+              {% for friend_of_friend in friend.friends %}
+                <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:32px;vertical-align:middle"/></a>
+              {% endfor %}
             </li>
-            {% endfor %}
             </ul>
             {% endif %}
           </li>
