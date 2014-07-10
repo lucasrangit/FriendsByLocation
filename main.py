@@ -238,7 +238,7 @@ class MainPage(BaseHandler):
 
     locations_list = sorted(locations.items(), key=lambda l: l[1]['name'])
     locations_list_2 = sorted(locations_2.items(), key=lambda l: l[1]['name'])
-    logging.info(json.encode(locations_list))
+
     template = template_env.get_template('home.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,
