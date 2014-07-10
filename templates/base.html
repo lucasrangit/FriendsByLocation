@@ -70,7 +70,7 @@
 
       <div class="starter-template">
       {% if user %}
-        <h1><a href="{{ user.profile_url }}"><img width="50" height="50" src="http://graph.facebook.com/{{ user.id }}/picture?type=square"/></a>Hello, {{ user.name|escape }}</h1>
+        <h1><a href="{{ user.profile_url }}"><img width="50" height="50" src="//graph.facebook.com/{{ user.id }}/picture?type=square"/></a>Hello, {{ user.name|escape }}</h1>
       {% else %}
         <h1>Hello, sign it to continue.</h1>
       {% endif %}
