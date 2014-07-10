@@ -6,6 +6,7 @@ import os
 import webapp2
 import urllib2
 from operator import itemgetter, attrgetter
+from webapp2_extras import json
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
@@ -185,10 +186,14 @@ class MainPage(BaseHandler):
         else:
           location_id = profile['current_location']['id']
           location_name = profile['current_location']['name']
+          lng = profile['current_location']['longitude']
+          lat = profile['current_location']['latitude']
           if location_id not in locations:
             locations[location_id] = dict()
             locations[location_id]['name'] = location_name
             locations[location_id]['count'] = 1
+            locations[location_id]['longitude'] = lng
+            locations[location_id]['latitude'] = lat
           else:
             locations[location_id]['count'] += 1
       #logging.info(locations)
@@ -233,7 +238,7 @@ class MainPage(BaseHandler):
 
     locations_list = sorted(locations.items(), key=lambda l: l[1]['name'])
     locations_list_2 = sorted(locations_2.items(), key=lambda l: l[1]['name'])
-
+    logging.info(json.encode(locations_list))
     template = template_env.get_template('home.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,
@@ -244,6 +249,7 @@ class MainPage(BaseHandler):
       'friends_count': friends_count,
       'friends_count_2': friends_count_2,
       'google_maps_api_key': GOOGLE_MAPS_API_KEY,
+      'markers': json.encode(locations_list),
     }
     self.response.out.write(template.render(context))
     
