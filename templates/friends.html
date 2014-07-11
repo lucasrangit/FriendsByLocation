@@ -10,6 +10,7 @@
 
       <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
 
+      {% if friends_local_user|length > 0 %}
       <p>1st degree <b>app user</b> friends in {{ location_name }}: {{ friends_local_user|length }}</p>
       <ul class="list-group">
         {% for friend in friends_local_user %}
@@ -20,7 +21,9 @@
           </li>
         {% endfor %}
       </ul>
+      {% endif %}
 
+      {% if friends_local_not_user|length > 0 %}
       <p>1st degree friends in {{ location_name }}: {{ friends_local_not_user|length }}</p>
       <ul class="list-group">
         {% for friend in friends_local_not_user %}
@@ -31,12 +34,15 @@
           </li>
         {% endfor %}
       </ul>
+      {% endif %}
+
 
       <div class="alert alert-info">
         <span class="glyphicon glyphicon-info-sign"></span>
         2nd degree connections are only visible through a 1st degree app user.
       </div>
 
+      {% if friends_friends_local_not_user|length > 0 %}
       <p>2nd degree friends in {{ location_name }}: {{ friends_friends_local_not_user|length }}</p>
       <ul class="list-group">
         {% for uid, friend in friends_friends_local_not_user.iteritems() %}
@@ -56,6 +62,7 @@
           </li>
         {% endfor %}
         </ul>
+        {% endif %}
     </div>
   </div>
 
