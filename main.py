@@ -172,7 +172,6 @@ class MainPage(BaseHandler):
   def get(self):
     user = self.current_user
     locations = dict()
-    locations_2 = dict()
     friends_count = 0
     friends_count_2 = 0
     if user:
@@ -192,6 +191,7 @@ class MainPage(BaseHandler):
             locations[location_id] = dict()
             locations[location_id]['name'] = location_name
             locations[location_id]['count'] = 1
+            locations[location_id]['count_2'] = 0
             locations[location_id]['longitude'] = lng
             locations[location_id]['latitude'] = lat
           else:
@@ -220,12 +220,13 @@ class MainPage(BaseHandler):
           else:
             location_id = profile_friend['current_location']['id']
             location_name = profile_friend['current_location']['name']
-            if location_id not in locations_2:
-              locations_2[location_id] = dict()
-              locations_2[location_id]['name'] = location_name
-              locations_2[location_id]['count'] = 1
+            if location_id not in locations:
+              locations[location_id] = dict()
+              locations[location_id]['name'] = location_name
+              locations[location_id]['count'] = 0
+              locations[location_id]['count_2'] = 1
             else:
-              locations_2[location_id]['count'] += 1
+              locations[location_id]['count_2'] += 1
             friends_count_2 += 1
 
     if user:
@@ -237,7 +238,6 @@ class MainPage(BaseHandler):
       current_location = userprefs.location_id
 
     locations_list = sorted(locations.items(), key=lambda l: l[1]['name'])
-    locations_list_2 = sorted(locations_2.items(), key=lambda l: l[1]['name'])
 
     template = template_env.get_template('home.html')
     context = {
@@ -245,7 +245,6 @@ class MainPage(BaseHandler):
       'user': user,
       'userprefs': userprefs,
       'locations': locations_list,
-      'locations_2': locations_list_2,
       'friends_count': friends_count,
       'friends_count_2': friends_count_2,
       'google_maps_api_key': GOOGLE_MAPS_API_KEY,
