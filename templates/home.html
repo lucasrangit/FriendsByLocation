@@ -72,18 +72,6 @@
             </tbody>
           </table>
 
-          <ul class="list-group">
-            <li class="list-group-item active">
-              <b>1st degree friends: {{ friends_count }}</b>
-            </li>
-            {% for item in locations %}
-              <li class="list-group-item">
-                <span class="badge">{{ item[1].count }}</span>
-                <span class="location" data-location-id="{{ item[0] }}">{{ item[1].name }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-
         </div>
 
       </div>
