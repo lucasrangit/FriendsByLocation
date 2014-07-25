@@ -15,7 +15,15 @@
       function initialize() {
         var mapOptions = {
           center: new google.maps.LatLng(50.1142, .12231),
-          zoom: 2,
+          zoom: 1,
+          draggable: false,
+          navigationControl: false,
+          mapTypeControl: false,
+          panControl: false,
+          scaleControl: false,
+          scrollwheel: false,
+          streetViewControl: false,
+          zoomControl: false,
         };
         var map = new google.maps.Map(document.getElementById("map-canvas"),
             mapOptions);
@@ -47,7 +55,7 @@
 
       <div class="row-fluid">
  
-        <div id="map-canvas" class="" style="height:500px;"></div>
+        <div id="map-canvas" class="" style="height:300px;"></div>
 
       </div>
 
