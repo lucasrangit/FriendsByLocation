@@ -316,7 +316,7 @@ class FriendsPage(BaseHandler):
 
         # 2nd degree friends at current location
         # TODO ignore mutual friends and "me"
-        friends_friends_local_not_user2 = get_non_app_friends(graph_friend, location_id)
+        friends_friends_local_not_user2 = get_friends(graph_friend, location_id)
 
         # save the 2nd degree friend and add the current user as a friend
         for profile_friend in friends_friends_local_not_user2:
