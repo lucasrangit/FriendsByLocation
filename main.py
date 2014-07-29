@@ -287,6 +287,9 @@ class FriendsPage(BaseHandler):
       location_graph = graph.fql("SELECT name FROM place WHERE page_id=" + location_id)
       location_name = location_graph['data'][0]['name']
 
+      location = graph.get_object(location_id)
+      location_link = location['link']
+
       # 1st degree user friends at current location
       friends_local_user = get_app_friends(graph, location_id)
 
@@ -345,6 +348,7 @@ class FriendsPage(BaseHandler):
       'friends_local_not_user': friends_local_not_user,
       'friends_friends_local_not_user': friends_friends_local_not_user,
       'location_name': location_name,
+      'location_link': location_link,
     }
     self.response.out.write(template.render(context))
 
