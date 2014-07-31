@@ -29,16 +29,23 @@
             mapOptions);
 
         var markers = {{markers}};
-        console.log(markers);
 
         markers.forEach(function(p) {
           var point = new google.maps.LatLng(p[1].latitude, p[1].longitude);
+          var icon_file;
+          if (p[1].count_2 == 0)
+            icon_file = '/static/images/markers/red/marker' + p[1].count + '.png';
+          else if (p[1].count == 0)
+            icon_file = '/static/images/markers/blue/marker' + p[1].count_2 + '.png';
+          else
+            icon_file = '/static/images/markers/blue_red/marker' + (p[1].count + p[1].count_2) + '.png';
+ 
           var marker = new google.maps.Marker({
             position: point,
             map: map,
             title: p[1].name,
             icon: {
-              url: '/static/images/markers/marker' + p[1].count + '.png',
+              url: icon_file,
             },
             });
           });
