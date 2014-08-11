@@ -23,3 +23,6 @@ libraries:
   version: latest
 - name: markupsafe
   version: latest
+
+builtins:
+- appstats: on
