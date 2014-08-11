@@ -318,7 +318,6 @@ class FriendsPage(BaseHandler):
         graph_friend = facebook.GraphAPI(user_friend.access_token)
 
         # 2nd degree friends at current location
-        # TODO ignore mutual friends and "me"
         friends_friends_local_not_user2 = get_friends(graph_friend, location_id)
 
         # save the 2nd degree friend and add the current user as a friend
@@ -326,6 +325,9 @@ class FriendsPage(BaseHandler):
           # ignore mutual friend
           # FIXME inefficient, assumes 1st degree list is shorter than 2nd
           if any(f['uid'] == profile_friend['uid'] for f in friends_user):
+            continue
+          # ignore "me"
+          if str(profile_friend['uid']) == str(user['id']):
             continue
           if profile_friend['uid'] in friends_friends_local_not_user:
            friends_friends_local_not_user[profile_friend['uid']]['friends'].append(profile)
