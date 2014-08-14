@@ -303,11 +303,19 @@ class FriendsPage(BaseHandler):
       location = graph.get_object(location_id)
       location_link = location['link']
 
-      # 1st degree user friends at current location
-      friends_local_user = get_app_friends(graph, location_id)
+      friends = get_friends(graph, location_id)
 
-      # 1st degree non-user friends at current location
-      friends_local_not_user = get_non_app_friends(graph, location_id)
+      for profile in friends:
+        # is the friend a user?
+        user_friend = User.get_by_key_name(str(profile['uid']))
+
+        # user not in database
+        if not user_friend:
+          friends_local_not_user.append(profile)
+          continue
+
+        # user in database (i.e. is_app_user)
+        friends_local_user.append(profile)
 
       # 1st degree friends to invite
       for profile in friends_local_not_user:
