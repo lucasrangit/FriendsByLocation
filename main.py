@@ -167,6 +167,9 @@ def get_app_friends(g, l):
 def get_non_app_friends(g, l):
   return get_friends(g, l, "0")
 
+def remove_profile_by_uid(profiles, ids):
+  return [p for p in profiles if str(p['uid']) not in profiles]
+
 class MainPage(BaseHandler):
         
   def get(self):
@@ -213,11 +216,21 @@ class MainPage(BaseHandler):
         # location of 2nd degree friends
         friends_friends = get_friends(graph_friend)
 
+        logging.info(friends_friends)
+        remove_profile_by_uid(friends_friends, [user['id']])
+
         # save the location of the second degree friends and increment the occurrence count 
         for profile_friend in friends_friends:
           if not profile_friend['current_location']:
             continue
           else:
+            # ignore mutual friend
+            # FIXME inefficient, assumes 1st degree list is shorter than 2nd
+            if any(f['uid'] == profile_friend['uid'] for f in friends):
+              continue
+            # ignore "me"
+            if str(profile_friend['uid']) == str(user['id']):
+              continue
             location_id = profile_friend['current_location']['id']
             location_name = profile_friend['current_location']['name']
             if location_id not in locations:
