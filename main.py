@@ -168,7 +168,7 @@ def get_non_app_friends(g, l):
   return get_friends(g, l, "0")
 
 def remove_profile_by_uid(profiles, ids):
-  return [p for p in profiles if str(p['uid']) not in profiles]
+  return [p for p in profiles if str(p['uid']) not in ids]
 
 class MainPage(BaseHandler):
         
@@ -216,11 +216,10 @@ class MainPage(BaseHandler):
         # location of 2nd degree friends
         friends_friends = get_friends(graph_friend)
 
-        logging.info(friends_friends)
-        remove_profile_by_uid(friends_friends, [user['id']])
+        friends_friends_not_mutual = remove_profile_by_uid(friends_friends, [user['id']])
 
         # save the location of the second degree friends and increment the occurrence count 
-        for profile_friend in friends_friends:
+        for profile_friend in friends_friends_not_mutual:
           if not profile_friend['current_location']:
             continue
           else:
