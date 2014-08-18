@@ -140,6 +140,12 @@ class BaseHandler(webapp2.RequestHandler):
         """
         return self.session_store.get_session()
 
+def chunks(l, n):
+  """ Yield successive n-sized chunks from l.
+      From Ned Batchelder (http://stackoverflow.com/a/312464/388127)
+  """
+  for i in xrange(0, len(l), n):
+      yield l[i:i+n]
 
 def get_friends(graph, location_id="", is_user=""):
   """Return list friends for given GraphAPI client.
@@ -298,35 +304,38 @@ class FriendsPage(BaseHandler):
       location_id = str(userprefs.location_id)
       location = graph.get_object(location_id)
 
-      friends = get_friends(graph, location_id)
+      # get all friends
+      friends = get_friends(graph)
 
-      for profile in friends:
-        # is the friend a user?
-        user_friend = User.get_by_key_name(str(profile['uid']))
+      # get friends that are users
+      friends_user_uids = list()
+      # IN filter can accept 30 max
+      for friends_30 in chunks(friends, 30):
+        user_query = User.all()
+        user_query.filter("id IN", [str(f['uid']) for f in friends_30])
+        user_results = user_query.fetch(30)
+        for result in user_results:
+          friends_user_uids.append(result.id)
 
-        # user not in database
-        if not user_friend:
-          friends_local_not_user.append(profile)
-          continue
-
-        # user in database (i.e. is_app_user)
-        friends_local_user.append(profile)
+      # break list into user and non-users
+      friends_user = [p for p in friends if str(p['uid']) in friends_user_uids]
+      friends_not_user = [p for p in friends if str(p['uid']) not in friends_user_uids]
+      friends_local_user = [p for p in friends_user if p['current_location'] and str(p['current_location']['id']) == location_id]
+      friends_local_user = [p for p in friends_user if p['current_location']]
+      friends_local_not_user = [p for p in friends_not_user if p['current_location'] and str(p['current_location']['id']) == location_id]
 
       # 1st degree friends to invite
       for profile in friends_local_not_user:
         friends_local_not_user_uid_list.append(str(profile['uid']))
 
-      # all friends
-      friends_user = get_friends(graph)
-
       # find 2nd degree friends at current location
       # from friends from all locations that are users
       for profile in friends_user:
-
         # is the friend a user?
         user_friend = User.get_by_key_name(str(profile['uid']))
 
         # user not in database
+        # should never happen because we use friends_user
         if not user_friend:
           continue
 
