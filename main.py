@@ -321,7 +321,6 @@ class FriendsPage(BaseHandler):
       friends_user = [p for p in friends if str(p['uid']) in friends_user_uids]
       friends_not_user = [p for p in friends if str(p['uid']) not in friends_user_uids]
       friends_local_user = [p for p in friends_user if p['current_location'] and str(p['current_location']['id']) == location_id]
-      friends_local_user = [p for p in friends_user if p['current_location']]
       friends_local_not_user = [p for p in friends_not_user if p['current_location'] and str(p['current_location']['id']) == location_id]
 
       # 1st degree friends to invite
