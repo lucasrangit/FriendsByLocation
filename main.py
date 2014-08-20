@@ -164,7 +164,7 @@ def get_friends(graph, location_id="", is_user=""):
   Note: When modified to not use FQL, paging support will be required.
   """
   user = graph.get_object("me")
-  fql = "SELECT uid, name, profile_url, pic_small, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + user["id"] + ")"
+  fql = "SELECT uid, name, profile_url, pic_big, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + user["id"] + ")"
   if location_id:
     fql += " AND current_location.id=" + location_id
   if is_user:

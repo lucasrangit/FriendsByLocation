@@ -3,43 +3,51 @@
 {% block head %}
 {% endblock %}
 {% block content %}
+
+{% macro render_thumbnails(profiles) -%}
+  {% for profile in profiles %}
+    <div class="col-sm-4 col-md-3">
+      <div class="thumbnail">
+        <img src="{{ profile.pic_big }}" style="height:200px;vertical-align:middle" alt="pic_big" />
+        <div class="caption">
+          <h3>{{ profile.name|escape }}</h3>
+          {% if profile.about_me %}
+            <p>{{ profile.about_me|escape }}</p>
+          {% endif %}
+          <p>
+            <a href="{{ profile.profile_url }}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-user"></a>
+            <a class="msg_link btn btn-primary" role="button" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ profile.uid }}"></span></a>
+            <span class="btn btn-default">{{ profile.mutual_friend_count }} mutual</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+{%- endmacro %}
+
   {% if user %}
 
-  <div class="row-fluid">
+  <div class="row">
     <div class="">
-
-      <p>Want to see more connections? <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite your friends</a></p>
 
       {% if friends_local_user|length > 0 %}
       <p>1st degree <b>app user</b> friends in {{ location_name }}: {{ friends_local_user|length }}</p>
-      <ul class="list-group">
-        {% for friend in friends_local_user %}
-          <li class="list-group-item">
-            <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
-            <a class="msg_link" target="_blank" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
-            <span class="badge">{{ friend.mutual_friend_count }}</span>
-          </li>
-        {% endfor %}
-      </ul>
+      <div class="row">
+        {{ render_thumbnails(friends_local_user) }}
+      </div>
       {% endif %}
 
       {% if friends_local_not_user|length > 0 %}
       <p>1st degree friends in {{ location_name }}: {{ friends_local_not_user|length }}</p>
-      <ul class="list-group">
-        {% for friend in friends_local_not_user %}
-          <li class="list-group-item">
-            <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
-            <a class="msg_link" target="_blank" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
-            <span class="badge">{{ friend.mutual_friend_count }}</span>
-          </li>
-        {% endfor %}
-      </ul>
+      <div class="row">
+        {{ render_thumbnails(friends_local_not_user) }}
+      </div>
       {% endif %}
-
 
       <div class="alert alert-info">
         <span class="glyphicon glyphicon-info-sign"></span>
         2nd degree connections are only visible through a 1st degree app user.
+        <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite your friends to see more!</a>
       </div>
 
       {% if friends_friends_local_not_user|length > 0 %}
@@ -47,14 +55,14 @@
       <ul class="list-group">
         {% for uid, friend in friends_friends_local_not_user.iteritems() %}
           <li class="list-group-item">
-            <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_small }}" style="height:50px;vertical-align:middle"/>{{ friend.name|escape }}</a>
+            <a href="{{ friend.profile_url }}"><img src="{{ friend.pic_big }}" style="height:200px;vertical-align:middle"/>{{ friend.name|escape }}</a>
             <a class="msg_link" target="_blank" href="https://m.facebook.com/messages/thread/{{ friend.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ friend.uid }}"></span></a>
             <span class="badge">{{ friend.friends|length }}</span>
             {% if friend.friends|length > 0 %}
             <ul class="list-group">
               <li class="list-group-item">
               {% for friend_of_friend in friend.friends %}
-                <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_small }}" style="height:32px;vertical-align:middle"/></a>
+                <a href="{{ friend_of_friend.profile_url }}"><img src="{{ friend_of_friend.pic_big }}" style="height:32px;vertical-align:middle"/></a>
               {% endfor %}
             </li>
             </ul>
