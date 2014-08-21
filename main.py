@@ -35,6 +35,8 @@ class User(db.Model):
     profile_url = db.StringProperty(required=True)
     access_token = db.StringProperty(required=True)
 
+# TODO define uniqueness so object can be hashed and used in sets
+# https://stackoverflow.com/questions/4169252/remove-duplicates-in-list-of-object-with-python
 class Friend():
     def __init__(self, id, name, link, location):
         self.id = id
@@ -167,11 +169,11 @@ def get_friends(graph, location_id="", is_user=""):
     logging.error("There was an error retrieving friends of UID %s", user["id"])
     return list()
 
-def get_app_friends(g, l):
-  return get_friends(g, l, "1")
+def get_app_friends(g):
+  return get_friends(g, is_user="1")
 
-def get_non_app_friends(g, l):
-  return get_friends(g, l, "0")
+def get_non_app_friends(g):
+  return get_friends(g, is_user="0")
 
 def remove_profile_by_uid(profiles, ids):
   return [p for p in profiles if str(p['uid']) not in ids]
@@ -308,18 +310,15 @@ class FriendsPage(BaseHandler):
       friends = get_friends(graph)
 
       # get friends that are users
-      friends_user_uids = list()
-      # IN filter can accept 30 max
-      for friends_30 in chunks(friends, 30):
-        user_query = User.all()
-        user_query.filter("id IN", [str(f['uid']) for f in friends_30])
-        user_results = user_query.fetch(30)
-        for result in user_results:
-          friends_user_uids.append(result.id)
+      friends_user = get_app_friends(graph)
 
       # break list into user and non-users
-      friends_user = [p for p in friends if str(p['uid']) in friends_user_uids]
-      friends_not_user = [p for p in friends if str(p['uid']) not in friends_user_uids]
+      friends_not_user = list()
+      for friend in friends:
+        if not any(p['uid'] == friend['uid'] for p in friends_user):
+          friends_not_user.append(friend)
+
+      # break into list of locals
       friends_local_user = [p for p in friends_user if p['current_location'] and str(p['current_location']['id']) == location_id]
       friends_local_not_user = [p for p in friends_not_user if p['current_location'] and str(p['current_location']['id']) == location_id]
 
