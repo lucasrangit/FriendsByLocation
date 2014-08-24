@@ -7,6 +7,7 @@ import webapp2
 import urllib2
 from operator import itemgetter, attrgetter
 from webapp2_extras import json
+from datetime import datetime
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
@@ -34,6 +35,8 @@ class User(db.Model):
     name = db.StringProperty(required=True)
     profile_url = db.StringProperty(required=True)
     access_token = db.StringProperty(required=True)
+    offline_token = db.StringProperty(required=False)
+    offline_token_created = db.DateTimeProperty(required=False)
 
 # TODO define uniqueness so object can be hashed and used in sets
 # https://stackoverflow.com/questions/4169252/remove-duplicates-in-list-of-object-with-python
@@ -80,32 +83,34 @@ class BaseHandler(webapp2.RequestHandler):
                     logging.info('New app user')
                     graph = facebook.GraphAPI(cookie["access_token"])
 
-                    # replace with long live access token
-                    token_full = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)
-                    token = token_full['access_token']
-                    #logging.info('old token expires ' + cookie['expires'])
-                    #logging.info('new token expires ' + token_full['expires'])
-                    graph.access_token = token
+                    # also get long live access token for approved off-line access
+                    offline_token_full = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)
+                    offline_token = offline_token_full["access_token"]
+                    #logging.info('old token expires %s', cookie['expires'])
+                    #logging.info('new token expires %s', offline_token_full['expires'])
 
-                    # save user in objectstore
                     profile = graph.get_object("me")
                     user = User(
                         key_name=str(profile["id"]),
                         id=str(profile["id"]),
                         name=profile["name"],
                         profile_url=profile["link"],
-                        access_token=token,
+                        access_token=cookie["access_token"],
+                        offline_token=offline_token,
+                        offline_token_created=datetime.utcnow(),
                     )
                     user.put()
                 elif user.access_token != cookie["access_token"]:
                     logging.info('Existing app user with new access token')
-                    # get long live token
-                    graph = facebook.GraphAPI(cookie["access_token"])
-                    token = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)['access_token']
-                    graph.access_token = token
-                    # TODO how to update existing cookie, unless it is okay to keep extending
-                    # save user in objectstore
-                    user.access_token = token
+
+                    # Facebook will only extend the expiration time once per day
+                    # @see https://developers.facebook.com/docs/roadmap/completed-changes/offline-access-removal
+                    if user.offline_token_created.date() < datetime.utcnow().date(): 
+                      graph = facebook.GraphAPI(cookie["access_token"])
+                      user.offline_token = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)['access_token']
+                      user.offline_token_created = datetime.utcnow()
+
+                    user.access_token = cookie["access_token"]
                     user.put()
 
                 # User is now logged in
@@ -219,7 +224,7 @@ class MainPage(BaseHandler):
           continue
 
         # query their friends using the long-lived access token
-        graph_friend = facebook.GraphAPI(user_friend.access_token)
+        graph_friend = facebook.GraphAPI(user_friend.offline_token)
 
         # location of 2nd degree friends
         friends_friends = get_friends(graph_friend)
@@ -338,7 +343,7 @@ class FriendsPage(BaseHandler):
           continue
 
         # query their friends using the long-lived access token
-        graph_friend = facebook.GraphAPI(user_friend.access_token)
+        graph_friend = facebook.GraphAPI(user_friend.offline_token)
 
         # 2nd degree friends at current location
         friends_friends_local_not_user2 = get_friends(graph_friend, location_id)
