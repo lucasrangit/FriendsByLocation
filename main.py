@@ -110,7 +110,7 @@ class BaseHandler(webapp2.RequestHandler):
 
                     # Facebook will only extend the expiration time once per day
                     # @see https://developers.facebook.com/docs/roadmap/completed-changes/offline-access-removal
-                    if user.offline_token_created is None or user.offline_token_created.date() < datetime.utcnow().date():
+                    if user.offline_token_created.date() < datetime.utcnow().date(): 
                       graph = facebook.GraphAPI(cookie["access_token"])
                       user.offline_token = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)['access_token']
                       user.offline_token_created = datetime.utcnow()
