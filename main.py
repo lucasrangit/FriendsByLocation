@@ -7,7 +7,7 @@ import webapp2
 import urllib2
 from operator import itemgetter, attrgetter
 from webapp2_extras import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
@@ -62,8 +62,13 @@ class BaseHandler(webapp2.RequestHandler):
     def current_user(self):
         if self.session.get("user"):
             # User is logged in
-            logging.info("User is logged in.")
-            return self.session.get("user")
+            expires = datetime.strptime(self.session["user"]["expires"], "%Y-%m-%dT%H:%M:%S")
+            if datetime.utcnow() < expires:
+              logging.info("User is logged in.")
+              return self.session.get("user")
+            else:
+              logging.info("User is logged in but access_token expired.")
+              return None
         else:
             # To workaround "HTTPError: HTTP Error 400: Bad Request" 
             # in get_access_token_from_code() uncomment:
@@ -113,12 +118,14 @@ class BaseHandler(webapp2.RequestHandler):
                     user.access_token = cookie["access_token"]
                     user.put()
 
+                access_token_expires = (datetime.utcnow() + timedelta(0,int(cookie["expires"])))
                 # User is now logged in
                 self.session["user"] = dict(
                     name=user.name,
                     profile_url=user.profile_url,
                     id=user.id,
-                    access_token=user.access_token
+                    access_token=user.access_token,
+                    expires=access_token_expires.strftime("%Y-%m-%dT%H:%M:%S"),
                 )
                 return self.session.get("user")
         logging.info("No user logged in.")
