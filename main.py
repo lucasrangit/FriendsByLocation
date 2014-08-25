@@ -311,6 +311,7 @@ class FriendsPage(BaseHandler):
       userprefs = models.get_userprefs(user['id'])
     else:
       userprefs = None
+      self.redirect('/')
 
     if userprefs:
       graph = facebook.GraphAPI(user["access_token"])
@@ -373,21 +374,21 @@ class FriendsPage(BaseHandler):
 
         friends_list.append(profile)
 
-    template = template_env.get_template('friends.html')
-    context = {
-      'facebook_app_id': FACEBOOK_APP_ID,
-      'user': user,
-      'userprefs': userprefs,
-      'friends_list': friends_list,
-      'friends_local_not_user_uid_list': friends_local_not_user_uid_list,
-      'friends_with_locals_list': friends_with_locals_list,
-      'friends_local_user': friends_local_user,
-      'friends_local_not_user': friends_local_not_user,
-      'friends_friends_local_not_user': friends_friends_local_not_user,
-      'location_name': location['name'],
-      'location_link': location['link'],
-    }
-    self.response.out.write(template.render(context))
+      template = template_env.get_template('friends.html')
+      context = {
+        'facebook_app_id': FACEBOOK_APP_ID,
+        'user': user,
+        'userprefs': userprefs,
+        'friends_list': friends_list,
+        'friends_local_not_user_uid_list': friends_local_not_user_uid_list,
+        'friends_with_locals_list': friends_with_locals_list,
+        'friends_local_user': friends_local_user,
+        'friends_local_not_user': friends_local_not_user,
+        'friends_friends_local_not_user': friends_friends_local_not_user,
+        'location_name': location['name'],
+        'location_link': location['link'],
+      }
+      self.response.out.write(template.render(context))
 
 class LogoutHandler(BaseHandler):
   def get(self):
@@ -405,12 +406,11 @@ class PrefsPage(BaseHandler):
     try:
       userprefs.location_id = int(self.request.get('location'))
       userprefs.put()
+      self.redirect('/friends')
     except ValueError:
       # user entered value that was not integer
       pass # ignore
       self.redirect('/')
-
-    self.redirect('/friends')
 
 
 class AboutPage(BaseHandler):
