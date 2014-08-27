@@ -3,7 +3,6 @@ import jinja2
 import models
 import os
 import webapp2
-import urllib2
 from webapp2_extras import json
 from datetime import datetime, timedelta
 
@@ -278,15 +277,6 @@ class MainPage(BaseHandler):
       'markers': json.encode(locations_list),
     }
     self.response.out.write(template.render(context))
-    
-  def post(self):
-    url = self.request.get('url')
-    file = urllib2.urlopen(url)
-    graph = facebook.GraphAPI(self.current_user['access_token'])
-    response = graph.put_photo(file, "Test Image")
-    photo_url = ("http://www.facebook.com/"
-                 "photo.php?fbid={0}".format(response['id']))
-    self.redirect(str(photo_url))
 
 class FriendsPage(BaseHandler):
 
