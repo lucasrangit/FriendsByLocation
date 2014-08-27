@@ -27,26 +27,26 @@ template_env = jinja2.Environment(
   loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'templates')))
 
 class User(db.Model):
-    id = db.StringProperty(required=True)
-    created = db.DateTimeProperty(auto_now_add=True)
-    updated = db.DateTimeProperty(auto_now=True)
-    name = db.StringProperty(required=True)
-    profile_url = db.StringProperty(required=True)
-    access_token = db.StringProperty(required=True)
-    offline_token = db.StringProperty(required=False)
-    offline_token_created = db.DateTimeProperty(required=False)
+  id = db.StringProperty(required=True)
+  created = db.DateTimeProperty(auto_now_add=True)
+  updated = db.DateTimeProperty(auto_now=True)
+  name = db.StringProperty(required=True)
+  profile_url = db.StringProperty(required=True)
+  access_token = db.StringProperty(required=True)
+  offline_token = db.StringProperty(required=False)
+  offline_token_created = db.DateTimeProperty(required=False)
 
 # TODO define uniqueness so object can be hashed and used in sets
 # https://stackoverflow.com/questions/4169252/remove-duplicates-in-list-of-object-with-python
 class Friend():
-    def __init__(self, id, name, link, location):
-        self.id = id
-        self.name = name
-        self.link = link
-        self.location = location
-        
-    def __str__(self):
-        return "%s (%s)" % (self.name, self.id)
+  def __init__(self, id, name, link, location):
+    self.id = id
+    self.name = name
+    self.link = link
+    self.location = location
+      
+  def __str__(self):
+    return "%s (%s)" % (self.name, self.id)
         
 class BaseHandler(webapp2.RequestHandler):
     """Provides access to the active Facebook user in self.current_user
@@ -364,7 +364,7 @@ class FriendsPage(BaseHandler):
           if str(profile_friend['uid']) == str(user['id']):
             continue
           if profile_friend['uid'] in friends_friends_local_not_user:
-           friends_friends_local_not_user[profile_friend['uid']]['friends'].append(profile)
+            friends_friends_local_not_user[profile_friend['uid']]['friends'].append(profile)
           else:
             profile_friend['friends'] = list()
             profile_friend['friends'].append(profile)
