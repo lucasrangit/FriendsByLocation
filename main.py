@@ -264,9 +264,6 @@ class MainPage(BaseHandler):
     else:
       userprefs = None
     
-    if userprefs:
-      current_location = userprefs.location_id
-
     locations_list = sorted(locations.items(), key=lambda l: l[1]['name'])
 
     template = template_env.get_template('home.html')
@@ -298,11 +295,9 @@ class FriendsPage(BaseHandler):
     friends_list = list()
     friends_local_not_user_uid_list = list()
     friends_with_locals_list = list()
-    location_name = None
 
     friends_local_user = list()
     friends_local_not_user = list()
-    friends_friends_local_user = dict()
     friends_friends_local_not_user = dict()
 
     if user:
