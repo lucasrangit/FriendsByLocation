@@ -1,11 +1,9 @@
-import datetime
 import facebook
 import jinja2
 import models
 import os
 import webapp2
 import urllib2
-from operator import itemgetter, attrgetter
 from webapp2_extras import json
 from datetime import datetime, timedelta
 
