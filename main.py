@@ -39,8 +39,8 @@ class User(db.Model):
 # TODO define uniqueness so object can be hashed and used in sets
 # https://stackoverflow.com/questions/4169252/remove-duplicates-in-list-of-object-with-python
 class Friend():
-  def __init__(self, id, name, link, location):
-    self.id = id
+  def __init__(self, uid, name, link, location):
+    self.uid = uid
     self.name = name
     self.link = link
     self.location = location
