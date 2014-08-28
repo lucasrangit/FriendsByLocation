@@ -63,9 +63,6 @@ class BaseHandler(webapp2.RequestHandler):
             logging.info("User is logged in.")
             return self.session.get("user")
         else:
-            # To workaround "HTTPError: HTTP Error 400: Bad Request" 
-            # in get_access_token_from_code() uncomment:
-            #return None
             logging.info("Check if user is logged in to Facebook.")
             # Either used just logged in or just saw the first page
             # We'll see here
