@@ -59,13 +59,8 @@ class BaseHandler(webapp2.RequestHandler):
     def current_user(self):
         if self.session.get("user"):
             # User is logged in
-            expires = datetime.strptime(self.session["user"]["expires"], "%Y-%m-%dT%H:%M:%S")
-            if datetime.utcnow() < expires:
-              logging.info("User is logged in.")
-              return self.session.get("user")
-            else:
-              logging.info("User is logged in but access_token expired.")
-              return None
+            logging.info("User is logged in.")
+            return self.session.get("user")
         else:
             # To workaround "HTTPError: HTTP Error 400: Bad Request" 
             # in get_access_token_from_code() uncomment:
