@@ -5,6 +5,7 @@ import os
 import webapp2
 from webapp2_extras import json
 from datetime import datetime, timedelta
+from urllib2 import HTTPError
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
@@ -68,9 +69,15 @@ class BaseHandler(webapp2.RequestHandler):
             logging.info("Check if user is logged in to Facebook.")
             # Either used just logged in or just saw the first page
             # We'll see here
-            cookie = facebook.get_user_from_cookie(self.request.cookies,
-                                                   FACEBOOK_APP_ID,
-                                                   FACEBOOK_APP_SECRET)
+            try:
+              cookie = facebook.get_user_from_cookie(self.request.cookies,
+                                                     FACEBOOK_APP_ID,
+                                                     FACEBOOK_APP_SECRET)
+            except HTTPError as err:
+              logging.error(err.code)
+              logging.error(err.reason)
+              return None
+              
             if cookie:
                 # Okay so user logged in.
                 # Now, check to see if existing user
