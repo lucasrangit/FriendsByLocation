@@ -120,8 +120,7 @@ class BaseHandler(webapp2.RequestHandler):
                     name=user.name,
                     profile_url=user.profile_url,
                     id=user.id,
-                    access_token=user.access_token,
-                    expires=access_token_expires.strftime("%Y-%m-%dT%H:%M:%S"),
+                    access_token=user.offline_token,
                 )
                 return self.session.get("user")
         logging.info("No user logged in.")
