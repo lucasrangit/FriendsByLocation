@@ -15,4 +15,19 @@
 
 </div>
 
+<div class="row">
+  <p class="lead">Privacy Policy</p>
+  <div id="privacy_policy">
+</div>
+
+<div class="row">
+  <p class="lead">Terms of Service</p>
+  <div id="terms_of_service">
+</div>
+
+<script>
+$("#privacy_policy").load("/static/text/privacy_policy.txt")
+$("#terms_of_service").load("/static/text/terms_of_service.txt")
+</script>
+
 {% endblock %}
