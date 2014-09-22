@@ -60,9 +60,9 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
+            <li {% if "about" == active_page %} class="active"{% endif %}><a href="/about">About</a></li>
             <li {% if "index" == active_page %} class="active"{% endif %}><a href="/">Search</a></li>
             <li {% if "friends" == active_page %} class="active"{% endif %}><a href="/friends">{{ location_name }}</a></li>
-            <li {% if "about" == active_page %} class="active"{% endif %}><a href="/about">About</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>
