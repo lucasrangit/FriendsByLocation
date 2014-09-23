@@ -383,24 +383,38 @@ class PrefsPage(BaseHandler):
   def post(self):
     user = self.current_user
     logging.info("Updating preferences for user %s" % user["id"])
+
     userprefs = models.get_userprefs(user["id"])
+
     try:
-      userprefs.location_id = int(self.request.get('location'))
-      userprefs.put()
-      self.redirect('/friends')
+      location_id = int(self.request.get('location'))
     except ValueError:
       # user entered value that was not integer
       pass # ignore
       self.redirect('/')
 
+    graph = facebook.GraphAPI(user["access_token"])
+    location = graph.get_object(self.request.get('location'))
+
+    userprefs.location_id = location_id
+    userprefs.location_name = location['name']
+    userprefs.put()
+    
+    self.redirect('/friends')
+
 
 class AboutPage(BaseHandler):
   def get(self):
     user = self.current_user
+    if user:
+      userprefs = models.get_userprefs(user['id'])
+    else:
+      userprefs = None
     template = template_env.get_template('about.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,
       'user': user,
+      'userprefs': userprefs,
     }
     self.response.out.write(template.render(context))
 
