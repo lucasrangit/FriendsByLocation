@@ -380,6 +380,22 @@ class LogoutHandler(BaseHandler):
 
 
 class PrefsPage(BaseHandler):
+  def get(self):
+    user = self.current_user
+
+    if user:
+      userprefs = models.get_userprefs(user["id"])
+    else:
+      userprefs = None
+
+    template = template_env.get_template('profile.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,
+      'user': user,
+      'userprefs': userprefs,
+    }
+    self.response.out.write(template.render(context))    
+  
   def post(self):
     user = self.current_user
     logging.info("Updating preferences for user %s" % user["id"])
@@ -421,6 +437,7 @@ class AboutPage(BaseHandler):
 application = webapp2.WSGIApplication(
   [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage), 
    ('/friends', FriendsPage),
+   ('/profile', PrefsPage),
    ('/about', AboutPage)],
   config=config,
   debug=True)

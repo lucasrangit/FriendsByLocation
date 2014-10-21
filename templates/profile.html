@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% set active_page = "profile" %}
+{% block title %}Profile{% endblock %}
+
+{% block head %}
+
+{% endblock %}
+
+{% block content %}
+<form class="form-horizontal">
+<fieldset>
+
+<!-- Form Name -->
+<legend>Preferences</legend>
+
+<!-- Appended checkbox -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="cbLocalCityName">Local City</label>
+  <div class="col-md-6">
+    <div class="input-group">
+      <input id="cbLocalCityName" name="cbLocalCityName" class="form-control" type="text" placeholder="{{ userprefs.location_name }}">
+	        <span class="input-group-addon">     
+          <input type="checkbox">     
+      </span>
+    </div>
+    <p class="help-block">Confirm your local city by clicking the checkbox.</p>
+  </div>
+</div>
+
+<!-- Multiple Checkboxes -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="cbNetworkVisibility">Open to meeting</label>
+  <div class="col-md-4">
+    <div class="checkbox">
+      <label for="cbNetworkVisibility-0">
+        <input type="checkbox" name="cbNetworkVisibility" id="cbNetworkVisibility-0" value="1">
+        1st degree friends
+      </label>
+	</div>
+  </div>
+</div>
+
+</fieldset>
+</form>
+
+{% endblock %}
