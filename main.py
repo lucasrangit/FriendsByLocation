@@ -156,7 +156,7 @@ def chunks(l, n):
   for i in xrange(0, len(l), n):
       yield l[i:i+n]
 
-def get_friends(graph, location_id="", is_user=""):
+def get_friends(graph, location_id="", is_user="1"):
   """Return list friends for given GraphAPI client.
   Optionally filter by location ID and IS or IS NOT application user.
   Ordered by mutual friends.
