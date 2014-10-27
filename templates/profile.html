@@ -3,44 +3,127 @@
 {% block title %}Profile{% endblock %}
 
 {% block head %}
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0; padding: 0 }
+  #map-canvas { height: 100% }
+</style>
+<!--
+<script type="text/javascript"
+  src="//maps.google.com/maps/api/js?key={{google_maps_api_key}}&sensor=false">
+</script>
+-->
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
+<script type="text/javascript">
+var geocoder;
+var map;
 
+  function initialize() {
+	  geocoder = new google.maps.Geocoder();
+    var mapOptions = {
+      center: new google.maps.LatLng(
+    		  {{ userprefs.lat|default("34.0522342") }},
+    		  {{ userprefs.lng|default("-118.2436849") }}
+    		  ),
+      zoom: 8,
+      draggable: false,
+      navigationControl: false,
+      mapTypeControl: false,
+      panControl: false,
+      scaleControl: false,
+      scrollwheel: false,
+      streetViewControl: false,
+      zoomControl: false,
+    };
+    map = new google.maps.Map(document.getElementById("map-canvas"),
+        mapOptions);
+  }
+  
+  function codeAddress() {
+	  var address = document.getElementById('location_input').value;
+	  geocoder.geocode( { 'address': address}, function(results, status) {
+	    if (status == google.maps.GeocoderStatus.OK) {
+	      map.setCenter(results[0].geometry.location);
+	      var marker = new google.maps.Marker({
+	          map: map,
+	          position: results[0].geometry.location
+	      });
+	      document.getElementById("lat").value = results[0].geometry.location.lat();
+	      document.getElementById("lng").value = results[0].geometry.location.lng();
+	      document.getElementById("button_lookup").classList.remove('btn-default');
+	      document.getElementById("button_lookup").classList.remove('btn-danger');
+	      document.getElementById("button_lookup").classList.add('btn-success');
+	    } else {
+	      alert('Geocode was not successful for the following reason: ' + status);
+	      document.getElementById("lat").value = "";
+	      document.getElementById("lng").value = "";
+	      document.getElementById("button_lookup").classList.remove('btn-default');
+	      document.getElementById("button_lookup").classList.add('btn-success');
+	      document.getElementById("button_lookup").classList.add('btn-danger');
+	    }
+	  });
+	}
+    
+  google.maps.event.addDomListener(window, 'load', initialize);
+</script>
 {% endblock %}
 
 {% block content %}
-<form class="form-horizontal">
-<fieldset>
+{% if user %}
+  
+<div class="container-fluid">
 
-<!-- Form Name -->
-<legend>Preferences</legend>
-
-<!-- Appended checkbox -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="cbLocalCityName">Local City</label>
-  <div class="col-md-6">
-    <div class="input-group">
-      <input id="cbLocalCityName" name="cbLocalCityName" class="form-control" type="text" placeholder="{{ userprefs.location_name }}">
-	        <span class="input-group-addon">     
-          <input type="checkbox">     
-      </span>
+  <div class="row-fluid">
+   <div id="map-canvas" class="" style="height:300px;"></div>
+  </div>
+  
+  <div class="row-fluid">
+    <form class="form-horizontal" action="/profile" method="post">
+    <fieldset>
+    
+    <!-- Form Name -->
+    <legend>Profile</legend>
+    
+    <!-- Text input-->
+    <div class="form-group">
+      <label class="col-md-4 control-label" for="local_city_input">Local City</label>  
+      <div class="col-md-5">
+        <input id="location_input" name="location" type="text" 
+          placeholder="{{ userprefs.location_name|default('Los Angeles, CA') }}" class="form-control input-md" required="">
+        <span class="help-block">Enter your local city and click Lookup.</span>  
+      <input type="button" id="button_lookup" class="btn btn-default" value="Lookup" onclick="codeAddress()">
+      <input type="hidden" id="lat" name="latitude" value=""/>
+      <input type="hidden" id="lng" name="longitude" value=""/>
+      </div>
     </div>
-    <p class="help-block">Confirm your local city by clicking the checkbox.</p>
+    
+    <!-- Multiple Checkboxes -->
+    <div class="form-group">
+      <label class="col-md-4 control-label" for="cbNetworkVisibility">Open to meeting</label>
+      <div class="col-md-4">
+        <div class="checkbox">
+          <label for="cbNetworkVisibility-0">
+            <input type="checkbox" name="cbNetworkVisibility" id="cbNetworkVisibility-0" value="0">
+            2nd degree friends
+          </label>
+      </div>
+      </div>
+    </div>
+
+    <!-- Button -->
+    <div class="form-group">
+      <label class="col-md-4 control-label" for=submitbutton></label>
+      <div class="col-md-4">
+        <button id="submitbutton" type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </div>
+      
+    </fieldset>
+    </form>
   </div>
+ 
 </div>
 
-<!-- Multiple Checkboxes -->
-<div class="form-group">
-  <label class="col-md-4 control-label" for="cbNetworkVisibility">Open to meeting</label>
-  <div class="col-md-4">
-    <div class="checkbox">
-      <label for="cbNetworkVisibility-0">
-        <input type="checkbox" name="cbNetworkVisibility" id="cbNetworkVisibility-0" value="1">
-        1st degree friends
-      </label>
-	</div>
-  </div>
-</div>
-
-</fieldset>
-</form>
-
+{% endif %}
 {% endblock %}
