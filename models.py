@@ -4,8 +4,8 @@ class UserPrefs(db.Model):
   location = db.StringProperty(default="",required=False)
   location_id = db.IntegerProperty(default=0,required=False)
   location_name = db.StringProperty(default="",required=False)
-  lat = db.FloatProperty(default=0.0,required=False)
-  lng = db.FloatProperty(default=0.0,required=False)
+  lat = db.FloatProperty(required=False)
+  lng = db.FloatProperty(required=False)
 
 def get_userprefs(user_id):
   key = db.Key.from_path('UserPrefs', user_id)

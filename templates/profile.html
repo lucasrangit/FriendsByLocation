@@ -23,8 +23,16 @@ var map;
 	  geocoder = new google.maps.Geocoder();
     var mapOptions = {
       center: new google.maps.LatLng(
-    		  {{ userprefs.lat|default("34.0522342") }},
-    		  {{ userprefs.lng|default("-118.2436849") }}
+    		  {% if userprefs.lat and userprefs.lat != 0 %}
+    		    {{userprefs.lat}},
+    		  {% else %}
+    		    34.0522342,
+    		  {% endif %}
+    		  {% if userprefs.lng and userprefs.lng != 0 %}
+    		    {{userprefs.lng}}
+          {% else %}
+    		    -118.2436849
+          {% endif %}
     		  ),
       zoom: 8,
       draggable: false,
