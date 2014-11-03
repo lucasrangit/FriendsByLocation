@@ -98,7 +98,7 @@ var map;
       <label class="col-md-4 control-label" for="local_city_input">Local City</label>  
       <div class="col-md-5">
         <input id="location_input" name="location" type="text" 
-          placeholder="{{ userprefs.location_name|default('Los Angeles, CA') }}" class="form-control input-md" required="">
+          placeholder="{{ userprefs.location|default('Los Angeles, CA') }}" class="form-control input-md" required="">
         <span class="help-block">Enter your local city and click Lookup.</span>  
       <input type="button" id="button_lookup" class="btn btn-default" value="Lookup" onclick="codeAddress()">
       <input type="hidden" id="lat" name="latitude" value=""/>
