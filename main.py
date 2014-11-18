@@ -1,4 +1,5 @@
 import facebook
+from facebook import GraphAPIError
 import jinja2
 import models
 import os
@@ -82,7 +83,7 @@ class BaseHandler(webapp2.RequestHandler):
                 logging.info("Cookie found, user is logged in.")
                 if not user:
                     logging.info('New app user')
-                    graph = facebook.GraphAPI(cookie["access_token"])
+                    graph = facebook.GraphAPI(version=2.1,access_token=cookie["access_token"])
 
                     # also get long live access token for approved off-line access
                     offline_token_full = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)
@@ -107,7 +108,7 @@ class BaseHandler(webapp2.RequestHandler):
                     # Facebook will only extend the expiration time once per day
                     # @see https://developers.facebook.com/docs/roadmap/completed-changes/offline-access-removal
                     if user.offline_token_created.date() < datetime.utcnow().date(): 
-                      graph = facebook.GraphAPI(cookie["access_token"])
+                      graph = facebook.GraphAPI(version=2.1,access_token=cookie["access_token"])
                       user.offline_token = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)['access_token']
                       user.offline_token_created = datetime.utcnow()
 
@@ -156,26 +157,25 @@ def chunks(l, n):
   for i in xrange(0, len(l), n):
       yield l[i:i+n]
 
-def get_friends(graph, location_id="", is_user="1"):
-  """Return list friends for given GraphAPI client.
-  Optionally filter by location ID and IS or IS NOT application user.
-  Ordered by mutual friends.
-  Note: When modified to not use FQL, paging support will be required.
+def get_friends(graph, location_id="", is_user=""):
+  """Return list app user friends for given GraphAPI client.
+  TODO Optionally filter by location ID and IS or IS NOT application user.
+  TODO Order by mutual friends. DEPRECATED in Graph API 2.x+
+  TODO paging support required.
   """
   user = graph.get_object("me")
-  fql = "SELECT uid, name, profile_url, pic_big, current_location, mutual_friend_count FROM user WHERE uid IN (SELECT uid1 FROM friend WHERE uid2 = " + user["id"] + ")"
-  if location_id:
-    fql += " AND current_location.id=" + location_id
-  if is_user:
-    fql += " AND is_app_user=" + is_user
-  fql += " ORDER BY mutual_friend_count DESC"
+  #friends = graph.get_connections(user["id"],"friends")
+  # could not add fields to get_connections, e.g. "fields=friends{id,link,name,location}"
   try:
-    fql_friends = graph.fql(fql)
-    return fql_friends['data']
-  except:
-    logging.error("There was an error retrieving friends of UID %s", user["id"])
+    friends = graph.get_object(user["id"]+"/friends",fields="id,name,link,location,picture")
+    return friends['data']
+  except GraphAPIError as ge:
+    logging.error("Error retrieving friends of UID %s: %s", user["id"], ge)
     return list()
-
+  except Exception as e:
+    logging.error("Error retrieving friends of UID %s: %s", user["id"], e)
+    return list()
+  
 def get_app_friends(g):
   return get_friends(g, is_user="1")
 
@@ -193,60 +193,68 @@ class MainPage(BaseHandler):
     friends_count = 0
     friends_count_2 = 0
     if user:
-      graph = facebook.GraphAPI(user["access_token"])
+      graph = facebook.GraphAPI(version=2.1,access_token=user["access_token"])
       friends = get_friends(graph)
       for profile in friends:
         #logging.info(profile)
         friends_count += 1
-        if not profile['current_location']:
-          continue
+        friend_prefs = models.get_userprefs(profile['id'])
+        if friend_prefs:
+          try:
+            location_id = friend_prefs.location_id
+            location_name = friend_prefs.location_name
+            location_lng = friend_prefs.location_lng
+            location_lat = friend_prefs.location_lat
+            if location_id not in locations:
+              locations[location_id] = dict()
+              locations[location_id]['name'] = location_name
+              locations[location_id]['count'] = 1
+              locations[location_id]['count_2'] = 0
+              locations[location_id]['longitude'] = location_lng
+              locations[location_id]['latitude'] = location_lat
+            else:
+              locations[location_id]['count'] += 1
+          except:
+            location_id = 0
+            location_lng = 0.0
+            location_lat = 0.0
+            location_name = "Unknown"
         else:
-          location_id = profile['current_location']['id']
-          location_name = profile['current_location']['name']
-          lng = profile['current_location']['longitude']
-          lat = profile['current_location']['latitude']
-          if location_id not in locations:
-            locations[location_id] = dict()
-            locations[location_id]['name'] = location_name
-            locations[location_id]['count'] = 1
-            locations[location_id]['count_2'] = 0
-            locations[location_id]['longitude'] = lng
-            locations[location_id]['latitude'] = lat
-          else:
-            locations[location_id]['count'] += 1
+          logging.info("User location unknown:" + profile['id'])
+          
       #logging.info(locations)
 
       # find locations of second degree friends
       for profile in friends:
         # is the friend a user?
-        user_friend = User.get_by_key_name(str(profile['uid']))
-
+        user_friend = User.get_by_key_name(str(profile['id']))
+ 
         # user not in database
         if not user_friend:
           continue
-
+ 
         # query their friends using the long-lived access token
-        graph_friend = facebook.GraphAPI(user_friend.offline_token)
-
+        graph_friend = facebook.GraphAPI(version=2.1,access_token=user_friend.offline_token)
+ 
         # location of 2nd degree friends
         friends_friends = get_friends(graph_friend)
-
+ 
         friends_friends_not_mutual = remove_profile_by_uid(friends_friends, [user['id']])
-
+ 
         # save the location of the second degree friends and increment the occurrence count 
         for profile_friend in friends_friends_not_mutual:
-          if not profile_friend['current_location']:
+          if not profile_friend['location']:
             continue
           else:
             # ignore mutual friend
             # FIXME inefficient, assumes 1st degree list is shorter than 2nd
-            if any(f['uid'] == profile_friend['uid'] for f in friends):
+            if any(f['id'] == profile_friend['id'] for f in friends):
               continue
             # ignore "me"
-            if str(profile_friend['uid']) == str(user['id']):
+            if str(profile_friend['id']) == str(user['id']):
               continue
-            location_id = profile_friend['current_location']['id']
-            location_name = profile_friend['current_location']['name']
+            location_id = profile_friend['location']['id']
+            location_name = profile_friend['location']['name']
             if location_id not in locations:
               locations[location_id] = dict()
               locations[location_id]['name'] = location_name
@@ -276,6 +284,7 @@ class MainPage(BaseHandler):
     }
     self.response.out.write(template.render(context))
 
+
 class FriendsPage(BaseHandler):
 
   def get(self):
@@ -295,7 +304,7 @@ class FriendsPage(BaseHandler):
       self.redirect('/')
 
     if userprefs:
-      graph = facebook.GraphAPI(user["access_token"])
+      graph = facebook.GraphAPI(version=2.1,access_token=user["access_token"])
 
       location_id = str(userprefs.location_id)
       location = graph.get_object(location_id)
@@ -313,8 +322,8 @@ class FriendsPage(BaseHandler):
           friends_not_user.append(friend)
 
       # break into list of locals
-      friends_local_user = [p for p in friends_user if p['current_location'] and str(p['current_location']['id']) == location_id]
-      friends_local_not_user = [p for p in friends_not_user if p['current_location'] and str(p['current_location']['id']) == location_id]
+      friends_local_user = [p for p in friends_user if p['location'] and str(p['location']['id']) == location_id]
+      friends_local_not_user = [p for p in friends_not_user if p['location'] and str(p['location']['id']) == location_id]
 
       # 1st degree friends to invite
       for profile in friends_local_not_user:
@@ -332,7 +341,7 @@ class FriendsPage(BaseHandler):
           continue
 
         # query their friends using the long-lived access token
-        graph_friend = facebook.GraphAPI(user_friend.offline_token)
+        graph_friend = facebook.GraphAPI(version=2.1,access_token=user_friend.offline_token)
 
         # 2nd degree friends at current location
         friends_friends_local_not_user2 = get_friends(graph_friend, location_id)
