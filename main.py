@@ -182,8 +182,8 @@ def get_app_friends(g):
 def get_non_app_friends(g):
   return get_friends(g, is_user="0")
 
-def remove_profile_by_uid(profiles, ids):
-  return [p for p in profiles if str(p['uid']) not in ids]
+def remove_profile_by_id(profiles, ids):
+  return [p for p in profiles if str(p['id']) not in ids]
 
 class MainPage(BaseHandler):
         
@@ -197,6 +197,13 @@ class MainPage(BaseHandler):
       friends = get_friends(graph)
       for profile in friends:
         #logging.info(profile)
+        # is the friend a user?
+        user_friend = User.get_by_key_name(str(profile['id']))
+ 
+        # user not in database
+        if not user_friend:
+          continue
+
         friends_count += 1
         friend_prefs = models.get_userprefs(profile['id'])
         if friend_prefs:
@@ -239,7 +246,7 @@ class MainPage(BaseHandler):
         # location of 2nd degree friends
         friends_friends = get_friends(graph_friend)
  
-        friends_friends_not_mutual = remove_profile_by_uid(friends_friends, [user['id']])
+        friends_friends_not_mutual = remove_profile_by_id(friends_friends, [user['id']])
  
         # save the location of the second degree friends and increment the occurrence count 
         for profile_friend in friends_friends_not_mutual:
@@ -318,7 +325,7 @@ class FriendsPage(BaseHandler):
       # break list into user and non-users
       friends_not_user = list()
       for friend in friends:
-        if not any(p['uid'] == friend['uid'] for p in friends_user):
+        if not any(p['id'] == friend['id'] for p in friends_user):
           friends_not_user.append(friend)
 
       # break into list of locals
@@ -327,13 +334,13 @@ class FriendsPage(BaseHandler):
 
       # 1st degree friends to invite
       for profile in friends_local_not_user:
-        friends_local_not_user_uid_list.append(str(profile['uid']))
+        friends_local_not_user_uid_list.append(str(profile['id']))
 
       # find 2nd degree friends at current location
       # from friends from all locations that are users
       for profile in friends_user:
         # is the friend a user?
-        user_friend = User.get_by_key_name(str(profile['uid']))
+        user_friend = User.get_by_key_name(str(profile['id']))
 
         # user not in database
         # should never happen because we use friends_user
@@ -350,17 +357,17 @@ class FriendsPage(BaseHandler):
         for profile_friend in friends_friends_local_not_user2:
           # ignore mutual friend
           # FIXME inefficient, assumes 1st degree list is shorter than 2nd
-          if any(f['uid'] == profile_friend['uid'] for f in friends_user):
+          if any(f['id'] == profile_friend['id'] for f in friends_user):
             continue
           # ignore "me"
-          if str(profile_friend['uid']) == str(user['id']):
+          if str(profile_friend['id']) == str(user['id']):
             continue
-          if profile_friend['uid'] in friends_friends_local_not_user:
-            friends_friends_local_not_user[profile_friend['uid']]['friends'].append(profile)
+          if profile_friend['id'] in friends_friends_local_not_user:
+            friends_friends_local_not_user[profile_friend['id']]['friends'].append(profile)
           else:
             profile_friend['friends'] = list()
             profile_friend['friends'].append(profile)
-            friends_friends_local_not_user[profile_friend['uid']] = profile_friend
+            friends_friends_local_not_user[profile_friend['id']] = profile_friend
 
         friends_list.append(profile)
 
