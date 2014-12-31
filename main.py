@@ -394,7 +394,47 @@ class LogoutHandler(BaseHandler):
 
     self.redirect('/')
 
+class ProfilePage(BaseHandler):
+  def get(self):
+    user = self.current_user
 
+    if user:
+      userprefs = models.get_userprefs(user["id"])
+    else:
+      userprefs = None
+
+    template = template_env.get_template('profile.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,
+      'user': user,
+      'userprefs': userprefs,
+      #'google_maps_api_key': GOOGLE_MAPS_API_KEY,
+    }
+    self.response.out.write(template.render(context))    
+  
+  def post(self):
+    user = self.current_user
+    logging.info("Updating profile for user %s" % user["id"])
+
+    userprefs = models.get_userprefs(user["id"])
+
+    try:
+      lat = float(self.request.get('latitude'))
+      lng = float(self.request.get('longitude'))
+    except ValueError:
+      # user entered value that was not integer
+      pass # ignore
+      self.redirect('/')
+      
+    location_name = self.request.get('location')
+
+    userprefs.lat = lat
+    userprefs.lng = lng
+    userprefs.location_name = location_name
+    userprefs.put()
+    
+    self.redirect('/')
+  
 class PrefsPage(BaseHandler):
   def post(self):
     user = self.current_user
@@ -435,8 +475,11 @@ class AboutPage(BaseHandler):
     self.response.out.write(template.render(context))
 
 application = webapp2.WSGIApplication(
-  [('/', MainPage), ('/logout', LogoutHandler), ('/prefs', PrefsPage), 
+  [('/', MainPage), 
+   ('/logout', LogoutHandler), 
+   ('/prefs', PrefsPage), 
    ('/friends', FriendsPage),
+   ('/profile', ProfilePage),
    ('/about', AboutPage)],
   config=config,
   debug=True)
