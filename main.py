@@ -428,8 +428,8 @@ class ProfilePage(BaseHandler):
       
     location_name = self.request.get('location')
 
-    userprefs.lat = lat
-    userprefs.lng = lng
+    userprefs.location_lat = lat
+    userprefs.location_lng = lng
     userprefs.location_name = location_name
     userprefs.put()
     
