@@ -186,11 +186,17 @@ def get_non_app_friends(g):
 def remove_profile_by_id(profiles, ids):
   return [p for p in profiles if str(p['id']) not in ids]
 
-def is_app_user(id):
-  if User.get_by_key_name(id) and models.UserPrefs.get_by_key_name(id):
+def is_app_user(uid):
+  if User.get_by_key_name(uid) and models.UserPrefs.get_by_key_name(uid):
     return True
   else:
     return False
+
+def is_local(uid,latlng):
+  userprefs = models.UserPrefs.get_by_key_name(uid)
+  if not userprefs:
+    return False
+  return userprefs.location_lat == latlng[0] and userprefs.location_lng == latlng[1]
 
 class MainPage(BaseHandler):
         
@@ -202,9 +208,6 @@ class MainPage(BaseHandler):
     if user:
       graph = facebook.GraphAPI(version=2.1,access_token=user["access_token"])
 
-      #
-      # first degree
-      #
       friends = get_friends(graph)
       friends[:] = [friend for friend in friends if is_app_user(str(friend['id']))]
       for profile in friends:
@@ -227,14 +230,11 @@ class MainPage(BaseHandler):
         friend_user = User.get_by_key_name(str(profile['id']))
         graph_friend = facebook.GraphAPI(version=2.1,access_token=friend_user.offline_token)
 
-        #
-        # second degree
-        #
-        friends_friends = get_friends(graph_friend)
-        friends_friends[:] = [friend for friend in friends_friends if is_app_user(str(friend['id']))]
-        friends_friends_not_mutual = remove_profile_by_id(friends_friends, [user['id']])
+        friends_2 = get_friends(graph_friend)
+        friends_2[:] = [friend for friend in friends_2 if is_app_user(str(friend['id']))]
+        friends_1_2_with_out_mutual = remove_profile_by_id(friends_2, [user['id']])
  
-        for profile_2 in friends_friends_not_mutual:
+        for profile_2 in friends_1_2_with_out_mutual:
           # ignore mutual friend
           # FIXME inefficient, assumes 1st degree list is shorter than 2nd
           if any(f['id'] == profile_2['id'] for f in friends):
@@ -283,96 +283,62 @@ class FriendsPage(BaseHandler):
 
   def get(self):
     user = self.current_user
-    friends_list = list()
+    if not user:
+      self.redirect('/')
+    userprefs = models.get_userprefs(user['id'])
+    if not userprefs:
+      self.redirect('/')
+    
+    search_latlng = (userprefs.search_lat,userprefs.search_lng)
+
+    friends_local = list()
     friends_local_not_user_uid_list = list()
     friends_with_locals_list = list()
+    friends_local_2 = dict()
+    
+    graph = facebook.GraphAPI(version=2.1,access_token=user["access_token"])
 
-    friends_local_user = list()
-    friends_local_not_user = list()
-    friends_friends_local_not_user = dict()
+    friends = get_friends(graph)
+    friends[:] = [friend for friend in friends if is_app_user(str(friend['id']))]
+    friends_local = [friend for friend in friends if is_local(str(friend['id']),search_latlng)]
+    
+    for profile in friends:
+      user_friend = User.get_by_key_name(str(profile['id']))
 
-    if user:
-      userprefs = models.get_userprefs(user['id'])
-    else:
-      userprefs = None
-      self.redirect('/')
+      graph_friend = facebook.GraphAPI(version=2.1,access_token=user_friend.offline_token)
 
-    if userprefs:
-      graph = facebook.GraphAPI(version=2.1,access_token=user["access_token"])
-
-      location_id = str(userprefs.location_id)
-      location = graph.get_object(location_id)
-
-      # get all friends
-      friends = get_friends(graph)
-
-      # get friends that are users
-      friends_user = get_app_friends(graph)
-
-      # break list into user and non-users
-      friends_not_user = list()
-      for friend in friends:
-        if not any(p['id'] == friend['id'] for p in friends_user):
-          friends_not_user.append(friend)
-
-      # break into list of locals
-      friends_local_user = [p for p in friends_user if p['location'] and str(p['location']['id']) == location_id]
-      friends_local_not_user = [p for p in friends_not_user if p['location'] and str(p['location']['id']) == location_id]
-
-      # 1st degree friends to invite
-      for profile in friends_local_not_user:
-        friends_local_not_user_uid_list.append(str(profile['id']))
-
-      # find 2nd degree friends at current location
-      # from friends from all locations that are users
-      for profile in friends_user:
-        # is the friend a user?
-        user_friend = User.get_by_key_name(str(profile['id']))
-
-        # user not in database
-        # should never happen because we use friends_user
-        if not user_friend:
+      friends_2 = get_friends(graph_friend)
+      friends_2[:] = [friend for friend in friends_2 if is_app_user(str(friend['id']))]
+      friends_2_local = [friend for friend in friends_2 if is_local(str(friend['id']),search_latlng)]
+    
+      for profile_2 in friends_2_local:
+        # ignore mutual friend
+        # FIXME inefficient, assumes 1st degree list is shorter than 2nd, use sets?
+        if any(f['id'] == profile_2['id'] for f in friends):
           continue
+        # ignore "me"
+        if str(profile_2['id']) == str(user['id']):
+          continue
+        if profile_2['id'] in friends_local_2:
+          friends_local_2[profile_2['id']]['friends'].append(profile)
+        else:
+          profile_2['friends'] = list()
+          profile_2['friends'].append(profile)
+          friends_local_2[profile_2['id']] = profile_2
 
-        # query their friends using the long-lived access token
-        graph_friend = facebook.GraphAPI(version=2.1,access_token=user_friend.offline_token)
-
-        # 2nd degree friends at current location
-        friends_friends_local_not_user2 = get_friends(graph_friend, location_id)
-
-        # save the 2nd degree friend and add the current user as a friend
-        for profile_friend in friends_friends_local_not_user2:
-          # ignore mutual friend
-          # FIXME inefficient, assumes 1st degree list is shorter than 2nd
-          if any(f['id'] == profile_friend['id'] for f in friends_user):
-            continue
-          # ignore "me"
-          if str(profile_friend['id']) == str(user['id']):
-            continue
-          if profile_friend['id'] in friends_friends_local_not_user:
-            friends_friends_local_not_user[profile_friend['id']]['friends'].append(profile)
-          else:
-            profile_friend['friends'] = list()
-            profile_friend['friends'].append(profile)
-            friends_friends_local_not_user[profile_friend['id']] = profile_friend
-
-        friends_list.append(profile)
-
-      template = template_env.get_template('friends.html')
-      context = {
-        'facebook_app_id': FACEBOOK_APP_ID,
-        'user': user,
-        'userprefs': userprefs,
-        'friends_list': friends_list,
-        'friends_local_not_user_uid_list': friends_local_not_user_uid_list,
-        'friends_with_locals_list': friends_with_locals_list,
-        'friends_local_user': friends_local_user,
-        'friends_local_not_user': friends_local_not_user,
-        'friends_friends_local_not_user': friends_friends_local_not_user,
-        'location_name': location['name'],
-        'location_link': location['link'],
-      }
-      self.response.out.write(template.render(context))
+    template = template_env.get_template('friends.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,
+      'user': user,
+      'userprefs': userprefs,
+      'location_name': search_latlng,
+      'location_link': "https://www.meetdazy.com/",
+      'friends_local': friends_local,
+      'friends_local_2': friends_local_2,
+      'friends_local_not_user_uid_list': friends_local_not_user_uid_list,
+      'friends_with_locals_list': friends_with_locals_list,
+    }
+    self.response.out.write(template.render(context))
 
 class LogoutHandler(BaseHandler):
   def get(self):
@@ -422,12 +388,12 @@ class PrefsPage(BaseHandler):
     user = self.current_user
     logging.info("Updating preferences for user %s" % user["id"])
     try:
-      location_latlng = make_tuple(self.request.get('location'))
+      search_latlng = make_tuple(self.request.get('location'))
     except ValueError:
       self.redirect('/')
     userprefs = models.get_userprefs(user["id"])
-    userprefs.search_lat = float(location_latlng[0])
-    userprefs.search_lng = float(location_latlng[1])
+    userprefs.search_lat = float(search_latlng[0])
+    userprefs.search_lng = float(search_latlng[1])
     userprefs.put()
     self.redirect('/friends')
 

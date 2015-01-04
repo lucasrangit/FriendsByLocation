@@ -9,7 +9,7 @@
   {% for profile in profiles %}
     <div class="col-sm-4 col-md-3">
       <div class="thumbnail">
-        <img src="{{ profile.pic_big }}" style="height:200px;vertical-align:middle" alt="pic_big" />
+        <img src="https://graph.facebook.com/{{ profile['id'] }}/picture?width=200" style="height:200px;vertical-align:middle" alt="pic_big" />
         <div class="caption">
           <h3>{{ profile.name|escape }}</h3>
           {% if profile.about_me %}
@@ -30,7 +30,7 @@
   {% for uid, profile in profiles %}
   <div class="col-sm-4 col-md-3">
     <div class="thumbnail">
-      <img src="{{ profile.pic_big }}" style="height:200px;vertical-align:middle" alt="pic_big" />
+      <img src="https://graph.facebook.com/{{ profile['id'] }}/picture?width=200" style="height:200px;vertical-align:middle" alt="pic_big" />
       <div class="caption">
         <h3>{{ profile.name|escape }}</h3>
         {% if profile.about_me %}
@@ -53,17 +53,10 @@
   <div class="row">
     <div class="">
 
-      {% if friends_local_user|length > 0 %}
-      <p>1st degree <b>app user</b> friends in {{ location_name }}: {{ friends_local_user|length }}</p>
+      {% if friends_local|length > 0 %}
+      <p>1st degree <b>app user</b> friends in {{ location_name }}: {{ friends_local|length }}</p>
       <div class="row">
-        {{ render_thumbnails(friends_local_user) }}
-      </div>
-      {% endif %}
-
-      {% if friends_local_not_user|length > 0 %}
-      <p>1st degree friends in {{ location_name }}: {{ friends_local_not_user|length }}</p>
-      <div class="row">
-        {{ render_thumbnails(friends_local_not_user) }}
+        {{ render_thumbnails(friends_local) }}
       </div>
       {% endif %}
 
@@ -73,10 +66,10 @@
         <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite your friends to see more!</a>
       </div>
 
-      {% if friends_friends_local_not_user|length > 0 %}
-      <p>2nd degree friends in {{ location_name }}: {{ friends_friends_local_not_user|length }}</p>
+      {% if friends_local_2|length > 0 %}
+      <p>2nd degree friends in {{ location_name }}: {{ friends_local_2|length }}</p>
       <div class="row">
-        {{ render_thumbnails_dict(friends_friends_local_not_user.iteritems()) }}
+        {{ render_thumbnails_dict(friends_local_2.iteritems()) }}
       </div>
       {% endif %}
     </div>
