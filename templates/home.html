@@ -84,11 +84,11 @@
               </tr>
             </thead>
             <tbody>
-              {% for item in locations %}
+              {% for location in locations %}
               <tr>
-                <td><span class="btn btn-default location" data-location-id="{{ item[0] }}">{{ item[1].name }}</span></td>
-                <td>{{ item[1].count }}</td>
-                <td>{{ item[1].count_2 }}</td>
+                <td><span class="btn btn-default location" data-location-id="{{ location[0] }}">{{ location[1].name }}</span></td>
+                <td>{{ location[1].count }}</td>
+                <td>{{ location[1].count_2 }}</td>
               </tr>
               {% endfor %}
             </tbody>

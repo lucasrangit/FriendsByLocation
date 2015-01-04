@@ -7,6 +7,7 @@ import webapp2
 from webapp2_extras import json
 from datetime import datetime, timedelta
 from urllib2 import HTTPError
+from ast import literal_eval as make_tuple
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
@@ -185,6 +186,12 @@ def get_non_app_friends(g):
 def remove_profile_by_id(profiles, ids):
   return [p for p in profiles if str(p['id']) not in ids]
 
+def is_app_user(id):
+  if User.get_by_key_name(id) and models.UserPrefs.get_by_key_name(id):
+    return True
+  else:
+    return False
+
 class MainPage(BaseHandler):
         
   def get(self):
@@ -194,82 +201,62 @@ class MainPage(BaseHandler):
     friends_count_2 = 0
     if user:
       graph = facebook.GraphAPI(version=2.1,access_token=user["access_token"])
+
+      #
+      # first degree
+      #
       friends = get_friends(graph)
+      friends[:] = [friend for friend in friends if is_app_user(str(friend['id']))]
       for profile in friends:
-        #logging.info(profile)
-        # is the friend a user?
-        user_friend = User.get_by_key_name(str(profile['id']))
- 
-        # user not in database
-        if not user_friend:
-          continue
-
         friends_count += 1
-        friend_prefs = models.get_userprefs(profile['id'])
-        if friend_prefs:
-          try:
-            location_id = friend_prefs.location_id
-            location_name = friend_prefs.location_name
-            location_lng = friend_prefs.location_lng
-            location_lat = friend_prefs.location_lat
-            if location_id not in locations:
-              locations[location_id] = dict()
-              locations[location_id]['name'] = location_name
-              locations[location_id]['count'] = 1
-              locations[location_id]['count_2'] = 0
-              locations[location_id]['longitude'] = location_lng
-              locations[location_id]['latitude'] = location_lat
-            else:
-              locations[location_id]['count'] += 1
-          except:
-            location_id = 0
-            location_lng = 0.0
-            location_lat = 0.0
-            location_name = "Unknown"
+        friend_prefs = models.UserPrefs.get_by_key_name(str(profile['id']))
+        location_name = friend_prefs.location_name
+        location_lng = friend_prefs.location_lng
+        location_lat = friend_prefs.location_lat
+        location_id = (location_lat,location_lng)
+        if location_id not in locations:
+          locations[location_id] = dict()
+          locations[location_id]['name'] = location_name
+          locations[location_id]['count'] = 1
+          locations[location_id]['count_2'] = 0
+          locations[location_id]['longitude'] = location_lng
+          locations[location_id]['latitude'] = location_lat
         else:
-          logging.info("User location unknown:" + profile['id'])
-          
-      #logging.info(locations)
+          locations[location_id]['count'] += 1
+        
+        friend_user = User.get_by_key_name(str(profile['id']))
+        graph_friend = facebook.GraphAPI(version=2.1,access_token=friend_user.offline_token)
 
-      # find locations of second degree friends
-      for profile in friends:
-        # is the friend a user?
-        user_friend = User.get_by_key_name(str(profile['id']))
- 
-        # user not in database
-        if not user_friend:
-          continue
- 
-        # query their friends using the long-lived access token
-        graph_friend = facebook.GraphAPI(version=2.1,access_token=user_friend.offline_token)
- 
-        # location of 2nd degree friends
+        #
+        # second degree
+        #
         friends_friends = get_friends(graph_friend)
- 
+        friends_friends[:] = [friend for friend in friends_friends if is_app_user(str(friend['id']))]
         friends_friends_not_mutual = remove_profile_by_id(friends_friends, [user['id']])
  
-        # save the location of the second degree friends and increment the occurrence count 
-        for profile_friend in friends_friends_not_mutual:
-          if not profile_friend['location']:
+        for profile_2 in friends_friends_not_mutual:
+          # ignore mutual friend
+          # FIXME inefficient, assumes 1st degree list is shorter than 2nd
+          if any(f['id'] == profile_2['id'] for f in friends):
             continue
+          # ignore "me"
+          if str(profile_2['id']) == str(user['id']):
+            continue
+          friends_count_2 += 1
+          friend_prefs_2 = models.UserPrefs.get_by_key_name(str(profile_2['id']))
+          location_name = friend_prefs_2.location_name
+          location_lng = friend_prefs_2.location_lng
+          location_lat = friend_prefs_2.location_lat
+          location_id = (location_lat,location_lng)
+          if location_id not in locations:
+            locations[location_id] = dict()
+            locations[location_id]['name'] = location_name
+            locations[location_id]['count'] = 0
+            locations[location_id]['count_2'] = 1
+            locations[location_id]['longitude'] = location_lng
+            locations[location_id]['latitude'] = location_lat
           else:
-            # ignore mutual friend
-            # FIXME inefficient, assumes 1st degree list is shorter than 2nd
-            if any(f['id'] == profile_friend['id'] for f in friends):
-              continue
-            # ignore "me"
-            if str(profile_friend['id']) == str(user['id']):
-              continue
-            location_id = profile_friend['location']['id']
-            location_name = profile_friend['location']['name']
-            if location_id not in locations:
-              locations[location_id] = dict()
-              locations[location_id]['name'] = location_name
-              locations[location_id]['count'] = 0
-              locations[location_id]['count_2'] = 1
-            else:
-              locations[location_id]['count_2'] += 1
-            friends_count_2 += 1
+            locations[location_id]['count_2'] += 1
 
     if user:
       userprefs = models.get_userprefs(user["id"])
@@ -415,9 +402,7 @@ class ProfilePage(BaseHandler):
   def post(self):
     user = self.current_user
     logging.info("Updating profile for user %s" % user["id"])
-
     userprefs = models.get_userprefs(user["id"])
-
     try:
       lat = float(self.request.get('latitude'))
       lng = float(self.request.get('longitude'))
@@ -425,37 +410,25 @@ class ProfilePage(BaseHandler):
       # user entered value that was not integer
       pass # ignore
       self.redirect('/')
-      
     location_name = self.request.get('location')
-
     userprefs.location_lat = lat
     userprefs.location_lng = lng
     userprefs.location_name = location_name
     userprefs.put()
-    
     self.redirect('/')
   
 class PrefsPage(BaseHandler):
   def post(self):
     user = self.current_user
     logging.info("Updating preferences for user %s" % user["id"])
-
-    userprefs = models.get_userprefs(user["id"])
-
     try:
-      location_id = int(self.request.get('location'))
+      location_latlng = make_tuple(self.request.get('location'))
     except ValueError:
-      # user entered value that was not integer
-      pass # ignore
       self.redirect('/')
-
-    graph = facebook.GraphAPI(user["access_token"])
-    location = graph.get_object(self.request.get('location'))
-
-    userprefs.location_id = location_id
-    userprefs.location_name = location['name']
+    userprefs = models.get_userprefs(user["id"])
+    userprefs.search_lat = float(location_latlng[0])
+    userprefs.search_lng = float(location_latlng[1])
     userprefs.put()
-    
     self.redirect('/friends')
 
 
