@@ -122,7 +122,8 @@
             $.post(
               "/prefs",
               {
-                location: $(this).attr('data-location-id'),
+                location_name: $(this).text(),
+                location_latlng: $(this).attr('data-location-id'),
                 beforeSend: function(){
                   $(item).append($(text_to_insert));
                 },

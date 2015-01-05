@@ -12,6 +12,7 @@ from ast import literal_eval as make_tuple
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
 import secrets
+from models import UserPrefs
 FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID
 FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET
 GOOGLE_MAPS_API_KEY = secrets.GOOGLE_MAPS_API_KEY
@@ -291,7 +292,6 @@ class FriendsPage(BaseHandler):
     
     search_latlng = (userprefs.search_lat,userprefs.search_lng)
 
-    friends_local = list()
     friends_local_not_user_uid_list = list()
     friends_with_locals_list = list()
     friends_local_2 = dict()
@@ -386,12 +386,13 @@ class ProfilePage(BaseHandler):
 class PrefsPage(BaseHandler):
   def post(self):
     user = self.current_user
-    logging.info("Updating preferences for user %s" % user["id"])
     try:
-      search_latlng = make_tuple(self.request.get('location'))
+      search_latlng = make_tuple(self.request.get('location_latlng'))
     except ValueError:
       self.redirect('/')
+    logging.info("Updating preferences for user %s" % user["id"])
     userprefs = models.get_userprefs(user["id"])
+    userprefs.search_name = self.request.get('location_name')
     userprefs.search_lat = float(search_latlng[0])
     userprefs.search_lng = float(search_latlng[1])
     userprefs.put()
