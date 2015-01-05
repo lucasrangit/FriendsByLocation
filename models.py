@@ -1,7 +1,6 @@
 from google.appengine.ext import db
 
 class UserPrefs(db.Model):
-  location_id = db.IntegerProperty(default=0,required=False)
   location_lng = db.FloatProperty(default=0.0,required=False)
   location_lat = db.FloatProperty(default=0.0,required=False)
   location_name = db.StringProperty(default="",required=False)
