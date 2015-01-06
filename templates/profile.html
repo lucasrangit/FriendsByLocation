@@ -57,6 +57,7 @@ var map;
 	          map: map,
 	          position: results[0].geometry.location
 	      });
+	      document.getElementById('location_input').value = results[0].formatted_address;
 	      document.getElementById("lat").value = results[0].geometry.location.lat();
 	      document.getElementById("lng").value = results[0].geometry.location.lng();
 	      document.getElementById("button_lookup").classList.remove('btn-default');
