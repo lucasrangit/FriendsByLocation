@@ -1,41 +1,24 @@
-import facebook
-from facebook import GraphAPIError
-import jinja2
-from models import User, UserPrefs, get_userprefs
 import os
-import webapp2
-from webapp2_extras import json
 from datetime import datetime, timedelta
 from urllib2 import HTTPError
 from ast import literal_eval as make_tuple
-
-# Store your Facebook app ID, API key, etc. in a file named secrets.py, which
-# is in .gitignore to protect the innocent.
+import logging
+import webapp2
+from webapp2_extras import json, sessions
+from google.appengine.ext import db
+import jinja2
+import facebook
+from facebook import GraphAPIError
+from models import User, UserPrefs, get_userprefs
 from secrets import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_APP_NAMESPACE, GOOGLE_MAPS_API_KEY 
 
-import logging
 logging.getLogger().setLevel(logging.DEBUG)
-
-from google.appengine.ext import db
-from webapp2_extras import sessions
 
 config = {}
 config['webapp2_extras.sessions'] = dict(secret_key='')
 
 template_env = jinja2.Environment(
   loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'templates')))
-
-# TODO define uniqueness so object can be hashed and used in sets
-# https://stackoverflow.com/questions/4169252/remove-duplicates-in-list-of-object-with-python
-class Friend():
-  def __init__(self, uid, name, link, location):
-    self.uid = uid
-    self.name = name
-    self.link = link
-    self.location = location
-      
-  def __str__(self):
-    return "%s (%s)" % (self.name, self.id)
         
 class BaseHandler(webapp2.RequestHandler):
     """Provides access to the active Facebook user in self.current_user
