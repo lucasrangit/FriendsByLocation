@@ -2,6 +2,7 @@ import facebook
 from facebook import GraphAPIError
 import jinja2
 import models
+from models import UserPrefs
 import os
 import webapp2
 from webapp2_extras import json
@@ -11,7 +12,6 @@ from ast import literal_eval as make_tuple
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
-from models import UserPrefs
 from secrets import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_APP_NAMESPACE, GOOGLE_MAPS_API_KEY 
 
 import logging
@@ -185,13 +185,13 @@ def remove_profile_by_id(profiles, ids):
   return [p for p in profiles if str(p['id']) not in ids]
 
 def is_app_user(uid):
-  if User.get_by_key_name(uid) and models.UserPrefs.get_by_key_name(uid):
+  if User.get_by_key_name(uid) and UserPrefs.get_by_key_name(uid):
     return True
   else:
     return False
 
 def is_local(uid,latlng):
-  userprefs = models.UserPrefs.get_by_key_name(uid)
+  userprefs = UserPrefs.get_by_key_name(uid)
   if not userprefs:
     return False
   return userprefs.location_lat == latlng[0] and userprefs.location_lng == latlng[1]
@@ -210,7 +210,7 @@ class MainPage(BaseHandler):
       friends[:] = [friend for friend in friends if is_app_user(str(friend['id']))]
       for profile in friends:
         friends_count += 1
-        friend_prefs = models.UserPrefs.get_by_key_name(str(profile['id']))
+        friend_prefs = UserPrefs.get_by_key_name(str(profile['id']))
         location_name = friend_prefs.location_name
         location_lng = friend_prefs.location_lng
         location_lat = friend_prefs.location_lat
@@ -241,7 +241,7 @@ class MainPage(BaseHandler):
           if str(profile_2['id']) == str(user['id']):
             continue
           friends_count_2 += 1
-          friend_prefs_2 = models.UserPrefs.get_by_key_name(str(profile_2['id']))
+          friend_prefs_2 = UserPrefs.get_by_key_name(str(profile_2['id']))
           location_name = friend_prefs_2.location_name
           location_lng = friend_prefs_2.location_lng
           location_lat = friend_prefs_2.location_lat
