@@ -11,11 +11,8 @@ from ast import literal_eval as make_tuple
 
 # Store your Facebook app ID, API key, etc. in a file named secrets.py, which
 # is in .gitignore to protect the innocent.
-import secrets
 from models import UserPrefs
-FACEBOOK_APP_ID = secrets.FACEBOOK_APP_ID
-FACEBOOK_APP_SECRET = secrets.FACEBOOK_APP_SECRET
-GOOGLE_MAPS_API_KEY = secrets.GOOGLE_MAPS_API_KEY
+from secrets import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_APP_NAMESPACE, GOOGLE_MAPS_API_KEY 
 
 import logging
 logging.getLogger().setLevel(logging.DEBUG)
@@ -329,6 +326,7 @@ class FriendsPage(BaseHandler):
     template = template_env.get_template('friends.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,
+      'facebook_app_namespace': FACEBOOK_APP_NAMESPACE,
       'user': user,
       'userprefs': userprefs,
       'location_name': search_latlng,
