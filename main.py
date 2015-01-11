@@ -1,8 +1,7 @@
 import facebook
 from facebook import GraphAPIError
 import jinja2
-import models
-from models import UserPrefs
+from models import User, UserPrefs, get_userprefs
 import os
 import webapp2
 from webapp2_extras import json
@@ -25,16 +24,6 @@ config['webapp2_extras.sessions'] = dict(secret_key='')
 
 template_env = jinja2.Environment(
   loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'templates')))
-
-class User(db.Model):
-  id = db.StringProperty(required=True)
-  created = db.DateTimeProperty(auto_now_add=True)
-  updated = db.DateTimeProperty(auto_now=True)
-  name = db.StringProperty(required=True)
-  profile_url = db.StringProperty(required=True)
-  access_token = db.StringProperty(required=True)
-  offline_token = db.StringProperty(required=False)
-  offline_token_created = db.DateTimeProperty(required=False)
 
 # TODO define uniqueness so object can be hashed and used in sets
 # https://stackoverflow.com/questions/4169252/remove-duplicates-in-list-of-object-with-python
@@ -257,7 +246,7 @@ class MainPage(BaseHandler):
             locations[location_id]['count_2'] += 1
 
     if user:
-      userprefs = models.get_userprefs(user["id"])
+      userprefs = get_userprefs(user["id"])
     else:
       userprefs = None
     
@@ -283,7 +272,7 @@ class FriendsPage(BaseHandler):
     user = self.current_user
     if not user:
       self.redirect('/')
-    userprefs = models.get_userprefs(user['id'])
+    userprefs = get_userprefs(user['id'])
     if not userprefs:
       self.redirect('/')
     
@@ -350,7 +339,7 @@ class ProfilePage(BaseHandler):
     user = self.current_user
 
     if user:
-      userprefs = models.get_userprefs(user["id"])
+      userprefs = get_userprefs(user["id"])
     else:
       userprefs = None
 
@@ -366,7 +355,7 @@ class ProfilePage(BaseHandler):
   def post(self):
     user = self.current_user
     logging.info("Updating profile for user %s" % user["id"])
-    userprefs = models.get_userprefs(user["id"])
+    userprefs = get_userprefs(user["id"])
     try:
       lat = float(self.request.get('latitude'))
       lng = float(self.request.get('longitude'))
@@ -389,7 +378,7 @@ class PrefsPage(BaseHandler):
     except ValueError:
       self.redirect('/')
     logging.info("Updating preferences for user %s" % user["id"])
-    userprefs = models.get_userprefs(user["id"])
+    userprefs = get_userprefs(user["id"])
     userprefs.search_name = self.request.get('location_name')
     userprefs.search_lat = float(search_latlng[0])
     userprefs.search_lng = float(search_latlng[1])
@@ -401,7 +390,7 @@ class AboutPage(BaseHandler):
   def get(self):
     user = self.current_user
     if user:
-      userprefs = models.get_userprefs(user['id'])
+      userprefs = get_userprefs(user['id'])
     else:
       userprefs = None
     template = template_env.get_template('about.html')
