@@ -16,8 +16,17 @@
             <p>{{ profile.about_me|escape }}</p>
           {% endif %}
           <p>
-            <a href="{{ profile.profile_url }}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-user"></a>
+            <a href="{{ profile['link'] }}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-user"></a>
             <a class="msg_link btn btn-primary" role="button" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ profile.uid }}"></span></a>
+            <a  class="vouch_link btn btn-primary" 
+                role="button" href="#" 
+                data-connector="{{ profile['id'] }}"
+                data-connector-profile-pic="{{ profile['picture']['data']['url'] }}"
+                data-location-lat="{{ userprefs.search_lat }}"
+                data-location-lng="{{ userprefs.search_lng }}"
+                data-location-name="{{ location_name }}">
+                <span class="glyphicon glyphicon-question-sign"></span>
+            </a>
             <span>{{ profile.mutual_friend_count|default('?') }} mutual</span>
           </p>
         </div>
@@ -77,8 +86,9 @@
   {% endif %}
 
 
+  <div id="result"></div>
 
-  <script>
+  <script type="text/javascript">
     if (!('ontouchstart' in window)) {
       $(".msg_link").attr('href', '#');
       $(".msg_link").removeAttr("target");
@@ -95,6 +105,7 @@
   </script>
 
   <script type="text/javascript">
+    var objectToLike = 'http://techcrunch.com/2013/02/06/facebook-launches-developers-live-video-channel-to-keep-its-developer-ecosystem-up-to-date/';
     $('#sendRequest').click(function() {
       FB.ui(
         {
@@ -115,5 +126,89 @@
         }
       );
     });
+  </script>
+  
+  <script type="text/javascript">
+    $('.vouch_link').click(function() {
+      FB.api(
+        'me/objects/friends_by_location:vouch',
+        'post',
+        { access_token : '{{ user.access_token }}',
+        	object : {
+        	  "fb:app_id": '{{ facebook_app_id }}',
+            "og:title": 'Vouch',
+            "og:type": 'friends_by_location:vouch',
+            "og:image": $(this).attr('data-connector-profile-pic'),
+            "og:description": 'Should this traveler be vouched for? Would they get along with this local? Comment below.',
+            "friends_by_location:connector": $(this).attr('data-connector'),
+            "friends_by_location:local": 663108670,
+            "friends_by_location:location:latitude": $(this).attr('data-location-lat'),
+            "friends_by_location:location:longitude": $(this).attr('data-location-lng'),
+            "friends_by_location:location_name": "{{ location_name }}"
+          }
+        },
+        function(response) {
+          if (!response) {
+            alert('Error occurred.');
+          } else if (response.error) {
+              console.log('Error: ' + response.error.message);
+          } else {
+        	  console.log(
+              '<a href=\"https://graph.facebook.com/' +
+              response.id + '\">' +
+              'Object created.  ID is ' +
+              response.id + '</a>'
+            );
+            FB.api(
+              'me/friends_by_location:request',
+              'post',
+              {
+              	vouch: response.id 
+              },
+              function(response2) {
+                if (!response2) {
+                  alert('Error occurred.');
+                } else if (response2.error) {
+                	console.log('Error: ' + response2.error.message);
+                } else {
+                	console.log(
+                    '<a href=\"https://www.facebook.com/me/activity/' +
+                    response2.id + '\">' +
+                    'Story created.  ID is ' +
+                    response2.id + '</a>'
+                  );
+                }
+              }
+            );
+          }
+        }
+      );
+    });
+  </script>
+  
+  <script type="text/javascript">
+    var objectToLike = 'http://techcrunch.com/2013/02/06/facebook-launches-developers-live-video-channel-to-keep-its-developer-ecosystem-up-to-date/';
+    function postLike() {
+      FB.api(
+         'https://graph.facebook.com/me/og.likes',
+         'post',
+         { object: objectToLike,
+           privacy: {'value': 'SELF'} },
+         function(response) {
+           if (!response) {
+             alert('Error occurred.');
+           } else if (response.error) {
+             document.getElementById('result').innerHTML =
+               'Error: ' + response.error.message;
+           } else {
+             document.getElementById('result').innerHTML =
+               '<a href=\"https://www.facebook.com/me/activity/' +
+               response.id + '\">' +
+               'Story created.  ID is ' +
+               response.id + '</a>';
+           }
+         }
+      );
+    }
   </script>
 {% endblock %}

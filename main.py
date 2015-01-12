@@ -368,6 +368,21 @@ class PrefsPage(BaseHandler):
     userprefs.put()
     self.redirect('/friends')
 
+class VouchPage(BaseHandler):
+  def get(self):
+    traveller = self.request.get('traveller')
+    local = self.request.get('local')
+    connector = self.request.get('connector')
+    template = template_env.get_template('vouch.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,
+      'facebook_app_namespace': FACEBOOK_APP_NAMESPACE,
+      'traveller': traveller,
+      'local': local,
+      'connector': connector,
+    }
+    self.response.out.write(template.render(context))
+
 
 class AboutPage(BaseHandler):
   def get(self):
@@ -390,6 +405,7 @@ application = webapp2.WSGIApplication(
    ('/prefs', PrefsPage), 
    ('/friends', FriendsPage),
    ('/profile', ProfilePage),
+   ('/vouch', VouchPage),
    ('/about', AboutPage)],
   config=config,
   debug=True)
