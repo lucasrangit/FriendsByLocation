@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# {{ facebook_app_namespace }}: http://ogp.me/ns/fb/{{ facebook_app_namespace }}#">
+  <meta property="fb:app_id"                              content="{{ facebook_app_id }}" />
+  <meta property="og:type"                                content="{{ facebook_app_namespace }}:vouch" />
+  <meta property="og:url"                                 content="https://friendsbylocation.appspot.com/vouch?traveler={{ traveler }}&connector={{ connector }}&local={{ local }}&location="{{ location }}" /> 
+  <meta property="og:title"                               content="Vouch" />
+  <meta property="og:image"                               content="https://friendsbylocation.appspot.com/static/images/vouch.jpg" />
+  <meta property="og:image:width"                         content="640" />
+  <meta property="og:image:height"                        content="480" /> 
+  <meta property="og:description"                         content="Should this traveler be vouched for? Would they get along with this local? Comment below." />
+  <meta property="friends_by_location:traveler"           content="{{ traveler }}" />
+  <meta property="friends_by_location:connector"          content="{{ connector }}" />
+  <meta property="friends_by_location:local"              content="{{ local }}" />
+  <meta property="friends_by_location:location_name"      content="{{ location_name }}" />
+</head>
+<body>
+</body>
+</html>

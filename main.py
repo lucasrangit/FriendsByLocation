@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timedelta
+import urllib2
 from urllib2 import HTTPError
 from ast import literal_eval as make_tuple
 import logging
@@ -370,16 +371,20 @@ class PrefsPage(BaseHandler):
 
 class VouchPage(BaseHandler):
   def get(self):
-    traveller = self.request.get('traveller')
+    traveler = self.request.get('traveler')
     local = self.request.get('local')
     connector = self.request.get('connector')
+    location = self.request.get('location')
+    location_name = urllib2.unquote(location).decode('utf8')
     template = template_env.get_template('vouch.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,
       'facebook_app_namespace': FACEBOOK_APP_NAMESPACE,
-      'traveller': traveller,
+      'traveler': traveler,
       'local': local,
       'connector': connector,
+      'location': location,
+      'location_name': location_name,
     }
     self.response.out.write(template.render(context))
 
