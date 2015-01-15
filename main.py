@@ -273,11 +273,10 @@ class FriendsPage(BaseHandler):
     friends_local = [friend for friend in friends if is_local(str(friend['id']),search_latlng)]
     
     for profile in friends:
-      user_friend = User.get_by_key_name(str(profile['id']))
+      user_2 = User.get_by_key_name(str(profile['id']))
+      graph_2 = facebook.GraphAPI(version=2.1,access_token=user_2.offline_token)
 
-      graph_friend = facebook.GraphAPI(version=2.1,access_token=user_friend.offline_token)
-
-      friends_2 = get_friends(graph_friend)
+      friends_2 = get_friends(graph_2)
       friends_2[:] = [friend for friend in friends_2 if is_app_user(str(friend['id']))]
       friends_2_local = [friend for friend in friends_2 if is_local(str(friend['id']),search_latlng)]
     
