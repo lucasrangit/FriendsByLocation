@@ -16,16 +16,12 @@
             <p>{{ profile.about_me|escape }}</p>
           {% endif %}
           <p>
-            <a href="{{ profile['link'] }}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-user"></a>
-            <a class="msg_link btn btn-primary" role="button" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ profile.uid }}"></span></a>
-            <a  class="vouch_link btn btn-primary" 
-                role="button" href="#" 
-                data-traveler="{{ user.id }}"
-                data-connector="{{ profile['id'] }}"
-                data-local="{{ profile['id'] }}"
-                data-location-name="{{ location_name }}">
-                <span class="glyphicon glyphicon-question-sign"></span>
+            <a href="{{ profile['link'] }}" 
+               class="btn btn-default" 
+               role="button">
+               <span class="glyphicon glyphicon-user"></span>
             </a>
+            <a class="msg_link btn btn-primary" role="button" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ profile.uid }}"></span></a>
             <span>{{ profile.mutual_friend_count|default('?') }} mutual</span>
           </p>
         </div>
@@ -45,8 +41,20 @@
           <p>{{ profile.about_me|escape }}</p>
         {% endif %}
         <p>
-          <a href="{{ profile.profile_url }}" class="btn btn-default" role="button"><span class="glyphicon glyphicon-user"></a>
+          <a href="{{ profile['link'] }}" 
+             class="btn btn-default" 
+             role="button">
+             <span class="glyphicon glyphicon-user"></span>
+          </a>
           <a class="msg_link btn btn-primary" role="button" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ profile.uid }}"></span></a>
+          <a class="vouch_link btn btn-primary" 
+             role="button" href="#" 
+             data-traveler="{{ user.id }}"
+             data-connector="{{ profile['id'] }}"
+             data-local="{{ profile['friends'][0]['id'] }}"
+             data-location-name="{{ location_name }}">
+             <span class="glyphicon glyphicon-question-sign"></span>
+          </a>
           <span>{{ profile.friends|length }} mutual</span>
         </p>
       </div>
@@ -154,7 +162,7 @@
               + $(that).attr('data-local')
               + ' in '
               + $(that).attr('data-location-name')
-              + '</a>'
+              + ' sent!</a>'
             );
             $("#vouchResult").removeClass('hide');
           }
