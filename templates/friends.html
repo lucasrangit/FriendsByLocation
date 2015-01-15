@@ -74,6 +74,8 @@
         <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite your friends to see more!</a>
       </div>
 
+      <div id="vouchResult" class="alert alert-success hide" role="alert"></div>
+
       {% if friends_local_2|length > 0 %}
       <p>2nd degree friends in {{ location_name }}: {{ friends_local_2|length }}</p>
       <div class="row">
@@ -83,9 +85,6 @@
     </div>
   </div>
   {% endif %}
-
-
-  <div id="result"></div>
 
   <script type="text/javascript">
     if (!('ontouchstart' in window)) {
@@ -128,12 +127,13 @@
   
   <script type="text/javascript">
     $('.vouch_link').click(function() {
+    	var that = this;
       FB.api(
         'me/friends_by_location:request',
         'post',
         {
           vouch: "https://friendsbylocation.appspot.com/vouch" 
-                 + "?traveler=" + $(this).attr('data-traveler') 
+                 + "?traveler="  + $(this).attr('data-traveler') 
                  + "&connector=" + $(this).attr('data-connector') 
                  + "&local="     + $(this).attr('data-local')
                  + "&location="  + encodeURIComponent($(this).attr('data-location-name'))
@@ -144,7 +144,19 @@
           } else if (response.error) {
             console.log('Error: ' + response.error.message);
           } else {
-            console.log('Story ID: ' + response.id);
+            console.log('Story: https://www.facebook.com/me/activity/' + response.id);
+            $("#vouchResult").html(
+              '<a href=\"https://www.facebook.com/me/activity/' 
+              + response.id 
+              + '\">Vouch request for '  
+              + $(that).attr('data-connector')
+              + ' to meet '
+              + $(that).attr('data-local')
+              + ' in '
+              + $(that).attr('data-location-name')
+              + '</a>'
+            );
+            $("#vouchResult").removeClass('hide');
           }
         }
       );
