@@ -11,12 +11,12 @@ import jinja2
 import facebook
 from facebook import GraphAPIError
 from models import User, UserPrefs, get_userprefs
-from secrets import FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_APP_NAMESPACE, GOOGLE_MAPS_API_KEY 
+from secrets import WEBAPP2_SECRET_KEY, FACEBOOK_APP_ID, FACEBOOK_APP_SECRET, FACEBOOK_APP_NAMESPACE, GOOGLE_MAPS_API_KEY 
 
 logging.getLogger().setLevel(logging.DEBUG)
 
 config = {}
-config['webapp2_extras.sessions'] = dict(secret_key='')
+config['webapp2_extras.sessions'] = dict(secret_key=WEBAPP2_SECRET_KEY)
 
 template_env = jinja2.Environment(
   loader=jinja2.FileSystemLoader(os.path.join(os.getcwd(),'templates')))
