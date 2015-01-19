@@ -6,7 +6,6 @@ from ast import literal_eval as make_tuple
 import logging
 import webapp2
 from webapp2_extras import json, sessions
-from google.appengine.ext import db
 import jinja2
 import facebook
 from facebook import GraphAPIError
