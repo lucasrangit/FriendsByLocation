@@ -9,6 +9,7 @@ class User(db.Model):
   access_token = db.StringProperty(required=True)
   offline_token = db.StringProperty(required=False)
   offline_token_created = db.DateTimeProperty(required=False)
+  offline_token_expires = db.DateTimeProperty(required=False)
 
 class UserPrefs(db.Model):
   location_lat = db.FloatProperty(default=0.0,required=False)

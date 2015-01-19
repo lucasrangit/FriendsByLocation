@@ -82,11 +82,11 @@ class BaseHandler(webapp2.RequestHandler):
                       graph = facebook.GraphAPI(version=2.1,access_token=cookie["access_token"])
                       user.offline_token = graph.extend_access_token(app_id=FACEBOOK_APP_ID,app_secret=FACEBOOK_APP_SECRET)['access_token']
                       user.offline_token_created = datetime.utcnow()
+                      user.offline_token_expires = (datetime.utcnow() + timedelta(0,int(cookie["expires"])))
 
                     user.access_token = cookie["access_token"]
                     user.put()
 
-                access_token_expires = (datetime.utcnow() + timedelta(0,int(cookie["expires"])))
                 # User is now logged in
                 self.session["user"] = dict(
                     name=user.name,
@@ -198,7 +198,7 @@ class MainPage(BaseHandler):
           locations[location_id]['count'] += 1
         
         friend_user = User.get_by_key_name(str(profile['id']))
-        if friend_user.offline_token_created < datetime.utcnow():
+        if friend_user.offline_token_created + datetime.timedelta(2*365/12) < datetime.utcnow():
           logging.info('Friend ' + str(profile['id']) + ' access token expired') 
           continue
         graph_friend = facebook.GraphAPI(version=2.1,access_token=friend_user.offline_token)
@@ -276,7 +276,7 @@ class FriendsPage(BaseHandler):
     
     for profile in friends:
       user_2 = User.get_by_key_name(str(profile['id']))
-      if user_2.offline_token_created < datetime.utcnow():
+      if user_2.offline_token_created + datetime.timedelta(2*365/12) < datetime.utcnow():
         logging.info('Friend ' + str(profile['id']) + ' access token expired') 
         continue
       graph_2 = facebook.GraphAPI(version=2.1,access_token=user_2.offline_token)
