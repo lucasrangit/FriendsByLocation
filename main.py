@@ -307,7 +307,7 @@ class FriendsPage(BaseHandler):
       'user': user,
       'userprefs': userprefs,
       'location_name': search_latlng,
-      'location_link': "https://www.meetdazy.com/",
+      'location_link': "https://friendsbylocation.appspot.com/",
       'friends_local': friends_local,
       'friends_local_2': friends_local_2,
       'friends_local_not_user_uid_list': friends_local_not_user_uid_list,
