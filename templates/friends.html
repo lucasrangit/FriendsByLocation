@@ -45,16 +45,20 @@
              role="button">
              <span class="glyphicon glyphicon-user"></span>
           </a>
-          <a class="msg_link btn btn-primary" role="button" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="glyphicon glyphicon-envelope msg" id="msg_{{ profile.uid }}"></span></a>
-          <a class="vouch_link btn btn-primary" 
-             role="button" href="#" 
-             data-traveler="{{ user.id }}"
-             data-connector="{{ profile['friends'][0]['id'] }}"
-             data-local="{{ profile['id'] }}"
-             data-location-name="{{ location_name }}">
-             <span class="glyphicon glyphicon-question-sign"></span>
-          </a>
-          <span>{{ profile.friends|length }} mutual</span>
+          <span>
+            <a class="msg_link" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="msg" id="msg_{{ profile.uid }}">Message</span></a>
+             or request vouch from 
+            {% for connector_profile in profile['friends'] %}
+              <a class="vouch_link" 
+                 href="#" 
+                 data-traveler="{{ user.id }}"
+                 data-connector="{{ connector_profile['id'] }}"
+                 data-local="{{ profile['id'] }}"
+                 data-location-name="{{ location_name }}">
+                 {{ connector_profile['name'] }} 
+              </a>
+            {% endfor %}
+          </span>
         </p>
       </div>
     </div>
