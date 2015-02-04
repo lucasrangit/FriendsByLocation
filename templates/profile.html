@@ -119,6 +119,18 @@ var map;
       </div>
       </div>
     </div>
+    
+    <div class="form-group">
+      <label class="col-md-4 control-label" for="cbAcknowledgedTerms">Terms</label>
+      <div class="col-md-4">
+        <div class="checkbox">
+          <label for="cbAcknowledgedTerms">
+            <input {% if userprefs.acknowledged_terms %}checked{% endif %} type="checkbox" name="cbAcknowledgedTerms" id="cbAcknowledgedTerms" value="0">
+            I acknowledge that I have read and agree to the above <a href="/terms">Terms of Service</a>
+          </label>
+      </div>
+      </div>
+    </div>
 
     <!-- Button -->
     <div class="form-group">

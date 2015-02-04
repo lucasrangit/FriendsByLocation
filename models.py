@@ -18,6 +18,7 @@ class UserPrefs(db.Model):
   search_lat = db.FloatProperty(default=0.0,required=False)
   search_lng = db.FloatProperty(default=0.0,required=False)
   search_name = db.StringProperty(default="",required=False)
+  acknowledged_terms = db.BooleanProperty(default=False,required=False)
 
 def get_userprefs(user_id):
   key = db.Key.from_path('UserPrefs', user_id)

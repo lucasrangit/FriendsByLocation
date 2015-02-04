@@ -352,6 +352,15 @@ class ProfilePage(BaseHandler):
       # user entered value that was not integer
       pass # ignore
       self.redirect('/')
+    try:
+      acknowledged = bool(self.request.get('cbAcknowledgedTerms'))
+    except ValueError:
+      acknowledged = False
+    if acknowledged:
+      userprefs.acknowledged_terms = True
+    else:
+      userprefs.acknowledged_terms = False
+    
     location_name = self.request.get('location')
     userprefs.location_lat = lat
     userprefs.location_lng = lng
