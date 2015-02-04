@@ -187,15 +187,16 @@ class MainPage(BaseHandler):
         location_lng = friend_prefs.location_lng
         location_lat = friend_prefs.location_lat
         location_id = (location_lat,location_lng)
-        if location_id not in locations:
-          locations[location_id] = dict()
-          locations[location_id]['name'] = location_name
-          locations[location_id]['count'] = 1
-          locations[location_id]['count_2'] = 0
-          locations[location_id]['longitude'] = location_lng
-          locations[location_id]['latitude'] = location_lat
-        else:
-          locations[location_id]['count'] += 1
+        if (0,0) != location_id:
+          if location_id not in locations:
+            locations[location_id] = dict()
+            locations[location_id]['name'] = location_name
+            locations[location_id]['count'] = 1
+            locations[location_id]['count_2'] = 0
+            locations[location_id]['longitude'] = location_lng
+            locations[location_id]['latitude'] = location_lat
+          else:
+            locations[location_id]['count'] += 1
         
         friend_user = User.get_by_key_name(str(profile['id']))
         if friend_user.offline_token_created + timedelta(2*365/12) < datetime.utcnow():
@@ -408,6 +409,37 @@ class AboutPage(BaseHandler):
     }
     self.response.out.write(template.render(context))
 
+class TermsPage(BaseHandler):
+  def get(self):
+    user = self.current_user
+    if user:
+      userprefs = get_userprefs(user['id'])
+    else:
+      userprefs = None
+    template = template_env.get_template('terms.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,
+      'user': user,
+      'userprefs': userprefs,
+    }
+    self.response.out.write(template.render(context))
+
+class PrivacyPage(BaseHandler):
+  def get(self):
+    user = self.current_user
+    if user:
+      userprefs = get_userprefs(user['id'])
+    else:
+      userprefs = None
+    template = template_env.get_template('privacy.html')
+    context = {
+      'facebook_app_id': FACEBOOK_APP_ID,
+      'user': user,
+      'userprefs': userprefs,
+    }
+    self.response.out.write(template.render(context))
+
+
 application = webapp2.WSGIApplication(
   [('/', MainPage), 
    ('/logout', LogoutHandler), 
@@ -415,7 +447,9 @@ application = webapp2.WSGIApplication(
    ('/friends', FriendsPage),
    ('/profile', ProfilePage),
    ('/vouch', VouchPage),
-   ('/about', AboutPage)],
+   ('/about', AboutPage),
+   ('/terms', TermsPage),
+   ('/privacy', PrivacyPage)],
   config=config,
   debug=True)
 

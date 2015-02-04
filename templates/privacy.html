@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% set active_page = "about" %}
+{% block title %}About{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+
+<div class="row">
+  <a name="privacy"></a> 
+  <div id="privacy_policy">
+</div>
+
+<script>
+$("#privacy_policy").load("/static/text/privacy_policy.html")
+</script>
+
+{% endblock %}

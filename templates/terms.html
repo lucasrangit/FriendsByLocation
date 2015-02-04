@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% set active_page = "about" %}
+{% block title %}About{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+
+<div class="row">
+  <a name="terms"></a> 
+  <div id="terms_of_service">
+</div>
+
+<script>
+$("#terms_of_service").load("/static/text/terms_of_service.html")
+</script>
+
+{% endblock %}
