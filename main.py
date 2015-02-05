@@ -172,6 +172,15 @@ class MainPage(BaseHandler):
         
   def get(self):
     user = self.current_user
+    
+    if user:
+      userprefs = get_userprefs(user["id"])
+      if not userprefs.acknowledged_terms:
+        self.redirect('/profile?terms=1')
+        return
+    else:
+      userprefs = None
+    
     locations = dict()
     friends_count = 0
     friends_count_2 = 0
@@ -231,11 +240,6 @@ class MainPage(BaseHandler):
             locations[location_id]['latitude'] = location_lat
           else:
             locations[location_id]['count_2'] += 1
-
-    if user:
-      userprefs = get_userprefs(user["id"])
-    else:
-      userprefs = None
     
     locations_list = sorted(locations.items(), key=lambda l: l[1]['name'])
 
@@ -257,11 +261,11 @@ class FriendsPage(BaseHandler):
 
   def get(self):
     user = self.current_user
-    if not user:
+    if user:
+      userprefs = get_userprefs(user["id"])
+    else:
       self.redirect('/')
-    userprefs = get_userprefs(user['id'])
-    if not userprefs:
-      self.redirect('/')
+      return
     
     search_latlng = (userprefs.search_lat,userprefs.search_lng)
 
@@ -332,11 +336,14 @@ class ProfilePage(BaseHandler):
     else:
       userprefs = None
 
+    show_terms = bool(self.request.get('terms'))
+
     template = template_env.get_template('profile.html')
     context = {
       'facebook_app_id': FACEBOOK_APP_ID,
       'user': user,
       'userprefs': userprefs,
+      'show_terms': show_terms,
       #'google_maps_api_key': GOOGLE_MAPS_API_KEY,
     }
     self.response.out.write(template.render(context))    
@@ -348,10 +355,13 @@ class ProfilePage(BaseHandler):
     try:
       lat = float(self.request.get('latitude'))
       lng = float(self.request.get('longitude'))
+      location_name = self.request.get('location')
+      userprefs.location_lat = lat
+      userprefs.location_lng = lng
+      userprefs.location_name = location_name
     except ValueError:
-      # user entered value that was not integer
       pass # ignore
-      self.redirect('/')
+
     try:
       acknowledged = bool(self.request.get('cbAcknowledgedTerms'))
     except ValueError:
@@ -361,10 +371,6 @@ class ProfilePage(BaseHandler):
     else:
       userprefs.acknowledged_terms = False
     
-    location_name = self.request.get('location')
-    userprefs.location_lat = lat
-    userprefs.location_lng = lng
-    userprefs.location_name = location_name
     userprefs.put()
     self.redirect('/')
   
