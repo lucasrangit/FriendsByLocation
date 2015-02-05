@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link href="/static/bootstrap/css/bootstrap.css" rel="stylesheet" type="text/css" />
-    <title>{% block title %}{% endblock %} - Facebook Friends by Location</title>
+    <title>{% block title %}{% endblock %} - Dazy</title>
     <script type="text/javascript" src="static/js/jquery.min.js"></script>
     <script type="text/javascript" src="static/bootstrap/js/bootstrap.js"></script>
     <script>
@@ -52,7 +52,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="/">Friends by Location</a>
+          <a class="navbar-brand" rel="home" href="/" title="Travel. Connected.">
+            <img style="max-width:100px; margin-top: -7px;"
+              src="/static/images/Logo-Over-Black_CMYK.jpg">
+            </img>
+          </a>
         </div>
         <div class="navbar-text navbar-right">
           <div 
@@ -83,9 +87,9 @@
       {% if user %}
         <h1><a href="{{ user.profile_url }}"><img width="50" height="50" src="//graph.facebook.com/{{ user.id }}/picture?type=square"/></a>Hello, {{ user.name|escape }}</h1>
       {% else %}
-        <h1>Hello, sign in to continue.</h1>
+        <h1>Welcome to Dazy. Sign in to continue.</h1>
       {% endif %}
-        <p class="lead">Find friends to meet when traveling.</p>
+        <p class="lead">Discover who you know, and who you can be introduced to, anywhere. Dazy makes traveling more social by helping you find and connect to friends (and friends of friends) in any destination.</p>
       </div>
 
     </div><!-- /.container -->
@@ -94,7 +98,7 @@
 
     <footer>
       <div class="container">
-        <p class="text-muted">Friends by Location - <a href="/about">About</a> - <a href="/terms">Terms</a> - <a href="/privacy">Privacy</a></p>
+        <p class="text-muted">Dazy - <a href="/about">About</a> - <a href="/terms">Terms</a> - <a href="/privacy">Privacy</a></p>
       </div>
     </footer>
 

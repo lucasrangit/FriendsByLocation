@@ -47,7 +47,7 @@
           </a>
           <span>
             <a class="msg_link" target="_blank" href="https://m.facebook.com/messages/thread/{{ profile.uid }}/"><span class="msg" id="msg_{{ profile.uid }}">Message</span></a>
-             or request vouch from 
+             or get introduced by 
             {% for connector_profile in profile['friends'] %}
               <a class="vouch_link" 
                  href="#" 
@@ -81,8 +81,8 @@
 
       <div class="alert alert-info">
         <span class="glyphicon glyphicon-info-sign"></span>
-        2nd degree connections are only visible through a 1st degree app user.
-        <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite your friends to see more!</a>
+        Not seeing enough locals? Your reach is powered by the strength of your network. 
+        <a href="#" id="sendRequest" data-message="Hi, accept this app so I can connect through you to people you may know in {{ location_name }} while I'm traveling.">Invite more friends to see more connections!</a>
       </div>
 
       <div id="vouchResult" class="alert alert-success hide" role="alert"></div>
