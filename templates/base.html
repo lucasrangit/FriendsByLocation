@@ -26,22 +26,35 @@
     <div id="fb-root"></div>
     <script type="text/javascript">
 		//<![CDATA[
-      window.fbAsyncInit = function() {
-        FB.init({appId: '{{ facebook_app_id }}', status: true, cookie: true,
-                 xfbml: true});
-        FB.Event.subscribe('{% if user %}auth.logout{% else %}auth.login{% endif %}', function(response) {
-          {% if user %} window.location = "/logout" {% else %} window.location.reload(); {% endif %}
-        });
-      };
-      (function() {
-        var e = document.createElement('script');
-        e.type = 'text/javascript';
-        e.src = document.location.protocol + '//connect.facebook.net/en_US/all.js';
-        e.async = true;
-        document.getElementById('fb-root').appendChild(e);
-      }());
-    //]]>
-    </script>
+			function statusChangeCallback(response) {
+				if (response.status === 'connected') {
+					window.location.reload()
+				} else {
+					window.location = "/logout"
+				}
+			}
+			function checkLoginState() {
+					FB.getLoginStatus(function(response) {
+						statusChangeCallback(response);
+				});
+			}
+			window.fbAsyncInit = function() {
+				FB.init({
+					appId: '{{ facebook_app_id }}', 
+					version: 'v2.1',
+					cookie: true,
+					xfbml: true
+				});
+			};
+			(function(d, s, id) {
+					var js, fjs = d.getElementsByTagName(s)[0];
+					if (d.getElementById(id)) return;
+					js = d.createElement(s); js.id = id;
+					js.src = "//connect.facebook.net/en_US/sdk.js";
+					fjs.parentNode.insertBefore(js, fjs);
+				}(document, 'script', 'facebook-jssdk'));
+		//]]>
+		</script>
 
     <div class="navbar navbar-inverse" role="navigation">
       <div class="container">
@@ -59,13 +72,13 @@
           </a>
         </div>
         <div class="navbar-text navbar-right">
-          <div 
-            class="fb-login-button" 
-            data-size="large" 
-            data-show-faces="false" 
-            data-auto-logout-link="true" 
-            data-scope="user_location,friends_location,public_profile,user_friends,publish_actions">
-          </div>
+          <fb:login-button 
+            scope="user_location,public_profile,user_friends,publish_actions" 
+            onlogin="checkLoginState();"
+            size="large"
+            show_faces="false"
+            auto_logout_link="true">
+          </fb:login-button>
         </div>
         <div class="navbar-header navbar-right">
         
